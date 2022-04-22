@@ -2,7 +2,7 @@ import { read } from 'fs';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { getServerSession } from "next-auth"
 import rateLimit from '../../../util/rate-limit';
-export const clientSessions: { [key: string]: {[key: string]: string} } = {}
+export const clientSessions: { [key: string]: string[] } = {}
 
 const limiter = rateLimit({
     interval: 60 * 1000, // 60 seconds
@@ -35,12 +35,18 @@ export default async function ReportAPIRoute(req: NextApiRequest, res: NextApiRe
                 delete clientSessions?.[id]
             }, persistance)
 
-        const nextAuthCookies =Object.fromEntries(
-            Object.entries(req.cookies)
-                .filter(([ key ]) => typeof key === "string" && (key.includes("next-auth.session") || key.includes("next-auth.crsf")))
-        )
+        const matchingEntries = Object.entries(req.cookies)
+            .filter(([ key ]) => typeof key === "string" && (key.includes("next-auth.session") || key.includes("next-auth.crsf")));
 
-        clientSessions[id] = nextAuthCookies
+        const csrf = matchingEntries.find(e => e[0].includes("next-auth.crsf"))?.[1]
+        const session = matchingEntries.find(e => e[0].includes("next-auth.session"))?.[1]
+
+        if(!csrf || !session)
+            return res.status(401).send({
+                error: "Could not get csrf and/or session"
+            })
+
+        clientSessions[id] = [ session, csrf ]
         console.log("New ID added", id)
         return res.send({
             successful: true
@@ -58,14 +64,17 @@ export default async function ReportAPIRoute(req: NextApiRequest, res: NextApiRe
             error: "Id has to be an uuid *2"
         })
 
-    const cookies = clientSessions[id]
+    const [ session, csrf ] = clientSessions[id]
     delete clientSessions[id]
-    let deleted =!clientSessions[id] && cookies
+    let deleted = !!session && !!csrf
     if(deleted) {
         console.log("Giving away data from id", id)
     }
     return res.send({
-        entry: cookies,
+        entry: {
+            session,
+            csrf
+        },
         reported: deleted,
         status: !deleted ? "Invalid ID" : "Temporary entry has been deleted. This is one time only."
     })

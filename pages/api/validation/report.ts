@@ -1,6 +1,4 @@
-import { read } from 'fs';
 import { NextApiRequest, NextApiResponse } from 'next';
-import { getServerSession } from "next-auth"
 import rateLimit from '../../../util/rate-limit';
 export const clientSessions: { [key: string]: string[] } = {}
 
@@ -36,9 +34,9 @@ export default async function ReportAPIRoute(req: NextApiRequest, res: NextApiRe
             }, persistance)
 
         const matchingEntries = Object.entries(req.cookies)
-            .filter(([ key ]) => typeof key === "string" && (key.includes("next-auth.session") || key.includes("next-auth.crsf")));
+            .filter(([ key ]) => typeof key === "string" && (key.includes("next-auth.session") || key.includes("next-auth.csrf")));
 
-        const csrf = matchingEntries.find(e => e[0].includes("next-auth.crsf"))?.[1]
+        const csrf = matchingEntries.find(e => e[0].includes("next-auth.csrf"))?.[1]
         const session = matchingEntries.find(e => e[0].includes("next-auth.session"))?.[1]
 
         if(!csrf || !session)
@@ -64,7 +62,7 @@ export default async function ReportAPIRoute(req: NextApiRequest, res: NextApiRe
             error: "Id has to be an uuid *2"
         })
 
-    const [ session, csrf ] = clientSessions[id]
+    const [ session, csrf ] = clientSessions?.[id]
     delete clientSessions[id]
     let deleted = !!session && !!csrf
     if(deleted) {

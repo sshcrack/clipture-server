@@ -39,7 +39,7 @@ function LoginPage() {
 
                     console.log("validation", res)
                 }
-                //window.close()
+                window.close()
             }
 
             asyncRun()

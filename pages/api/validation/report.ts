@@ -1,6 +1,6 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import rateLimit from '../../../util/rate-limit';
-export const clientSessions: { [key: string]: string[] } = {}
+export const clientSessions: { [key: string]: ClientSessionInterface[] } = {}
 
 const limiter = rateLimit({
     interval: 60 * 1000, // 60 seconds
@@ -16,7 +16,7 @@ export default async function ReportAPIRoute(req: NextApiRequest, res: NextApiRe
                 .send({ error: "No body" })
 
         const { id } = body
-        if (typeof id !== "string" || id?.length !== 36 *2)
+        if (typeof id !== "string" || id?.length !== 36 * 2)
             return res.status(400)
                 .send({ error: "ID has to be a string and 72 characters long." })
 
@@ -34,17 +34,28 @@ export default async function ReportAPIRoute(req: NextApiRequest, res: NextApiRe
             }, persistance)
 
         const matchingEntries = Object.entries(req.cookies)
-            .filter(([ key ]) => typeof key === "string" && (key.includes("next-auth.session") || key.includes("next-auth.csrf")));
+            .filter(([key]) => typeof key === "string" && (key.includes("next-auth.session") || key.includes("next-auth.csrf")));
 
-        const csrf = matchingEntries.find(e => e[0].includes("next-auth.csrf"))?.[1]
-        const session = matchingEntries.find(e => e[0].includes("next-auth.session"))?.[1]
+        const csrf = matchingEntries.find(e => e[0].includes("next-auth.csrf"))
+        const session = matchingEntries.find(e => e[0].includes("next-auth.session"))
 
-        if(!csrf || !session)
+        if (!csrf || !session)
             return res.status(401).send({
                 error: "Could not get csrf and/or session"
             })
 
-        clientSessions[id] = [ session, csrf ]
+        clientSessions[id] = [
+            {
+                key: csrf[0],
+                cookie: csrf[1],
+                type: "csrf",
+            },
+            {
+                key: session[0],
+                cookie: session[1],
+                type: "session",
+            }
+        ]
         console.log("New ID added", id)
         return res.send({
             successful: true
@@ -57,22 +68,19 @@ export default async function ReportAPIRoute(req: NextApiRequest, res: NextApiRe
             error: "Id has to be an string"
         })
 
-    if (id?.length !== 36 *2)
+    if (id?.length !== 36 * 2)
         return res.send({
             error: "Id has to be an uuid *2"
         })
 
-    const [ session, csrf ] = clientSessions?.[id] ?? []
+    const data = clientSessions?.[id] ?? []
     delete clientSessions[id]
-    let deleted = !!session && !!csrf
-    if(deleted) {
+    let deleted = !!data
+    if (deleted) {
         console.log("Giving away data from id", id)
     }
     return res.send({
-        entry: {
-            session,
-            csrf
-        },
+        entry: data,
         reported: deleted,
         status: !deleted ? "Invalid ID" : "Temporary entry has been deleted. This is one time only."
     })
@@ -83,4 +91,10 @@ export default async function ReportAPIRoute(req: NextApiRequest, res: NextApiRe
 interface RequestBody {
     id: string,
     session: string
+}
+
+interface ClientSessionInterface {
+    cookie: string,
+    key: string,
+    type: "session" | "csrf"
 }

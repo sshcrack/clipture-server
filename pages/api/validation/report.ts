@@ -75,7 +75,7 @@ export default async function ReportAPIRoute(req: NextApiRequest, res: NextApiRe
 
     const data = clientSessions?.[id] ?? []
     delete clientSessions[id]
-    let deleted = !!data
+    let deleted = data.length > 0
     if (deleted) {
         console.log("Giving away data from id", id)
     }

@@ -62,7 +62,7 @@ export default async function ReportAPIRoute(req: NextApiRequest, res: NextApiRe
             error: "Id has to be an uuid *2"
         })
 
-    const [ session, csrf ] = clientSessions?.[id]
+    const [ session, csrf ] = clientSessions?.[id] ?? []
     delete clientSessions[id]
     let deleted = !!session && !!csrf
     if(deleted) {

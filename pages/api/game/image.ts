@@ -10,15 +10,15 @@ fs.mkdirSync(detectablePath, { recursive: true })
 
 export default async function IconGameRoute(req: NextApiRequest, res: NextApiResponse) {
     const { id, icon } = req.query
-    if(typeof id !== "string")
+    if (typeof id !== "string")
         return res.json({ error: "Id has to be a string" })
 
-    if(typeof icon !== "string")
-        return res.json({ error: "Icon has has to be a string"})
+    if (typeof icon !== "string")
+        return res.json({ error: "Icon has has to be a string" })
 
 
     res.setHeader("Content-Type", "image/png")
-    if(icon === "null")
+    if (icon === "null")
         return fs.createReadStream(path.join("public", "unknown.png")).pipe(res)
 
     const filePath = path.join(detectablePath, id + "_" + icon + ".png")
@@ -26,7 +26,7 @@ export default async function IconGameRoute(req: NextApiRequest, res: NextApiRes
     const exists = await fsProm.stat(filePath)
         .then(() => true)
         .catch(() => false);
-    if(!exists) {
+    if (!exists) {
         const route = apiRoute(id, icon);
         console.log("MKDIr")
         fs.mkdirSync(detectablePath, { recursive: true })
@@ -38,5 +38,9 @@ export default async function IconGameRoute(req: NextApiRequest, res: NextApiRes
         return res.send(raw)
     }
 
-    return fs.createReadStream(filePath).pipe(res)
+    const downloadStream = fs.createReadStream(filePath)
+    await new Promise(resolve => {
+        downloadStream.pipe(res)
+        downloadStream.on('end', resolve)
+    })
 }

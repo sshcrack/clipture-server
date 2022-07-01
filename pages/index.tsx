@@ -12,6 +12,10 @@ const Home: NextPage = () => {
       </a>
       </Link>
 
+      <Link href="/api/download"><a>
+        Download Clipture
+      </a>
+      </Link>
       {data?.user?.name}
     </div>
   )

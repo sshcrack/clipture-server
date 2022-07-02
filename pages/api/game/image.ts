@@ -17,7 +17,7 @@ export default async function IconGameRoute(req: NextApiRequest, res: NextApiRes
         return res.json({ error: "Icon has has to be a string" })
 
 
-    res.setHeader("Content-Type", "image/png")
+        res.setHeader("Content-Type", "image/png")
     if (icon === "null") {
         let unknown = path.join("public", "unknown.png")
 
@@ -32,8 +32,7 @@ export default async function IconGameRoute(req: NextApiRequest, res: NextApiRes
     const filePath = path.join(detectablePath, id + "_" + icon + ".png")
     console.log("fs stat")
     const exists = await fsProm.stat(filePath)
-        .then(() => true)
-        .catch(() => false);
+        .catch(() => null);
     if (!exists) {
         const route = apiRoute(id, icon);
         console.log("MKDIr")
@@ -42,13 +41,15 @@ export default async function IconGameRoute(req: NextApiRequest, res: NextApiRes
         console.log(route)
         const raw = await got(route).then(e => e.rawBody)
 
-        fsProm.writeFile(filePath, raw)
+        res.setHeader("Content-Length", raw.byteLength)
+        await fsProm.writeFile(filePath, raw)
         return res.send(raw)
     }
 
     const downloadStream = fs.createReadStream(filePath)
-    await new Promise(resolve => {
+    res.setHeader("Content-Length", exists.size)
+    await new Promise<void>(resolve => {
         downloadStream.pipe(res)
-        downloadStream.on('end', resolve)
+        downloadStream.on('end', () => {resolve(); console.log("Stream end")})
     })
 }

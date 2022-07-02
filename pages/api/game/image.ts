@@ -18,8 +18,16 @@ export default async function IconGameRoute(req: NextApiRequest, res: NextApiRes
 
 
     res.setHeader("Content-Type", "image/png")
-    if (icon === "null")
-        return fs.createReadStream(path.join("public", "unknown.png")).pipe(res)
+    if (icon === "null") {
+        let unknown = path.join("public", "unknown.png")
+
+        const downloadStream = fs.createReadStream(unknown)
+        await new Promise(resolve => {
+            downloadStream.pipe(res)
+            downloadStream.on('end', resolve)
+        })
+        return
+    }
 
     const filePath = path.join(detectablePath, id + "_" + icon + ".png")
     console.log("fs stat")

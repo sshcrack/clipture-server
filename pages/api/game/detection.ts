@@ -22,5 +22,5 @@ export default async function DetectionRoute(_req: NextApiRequest, res: NextApiR
     }
 
     const data = JSON.parse(fs.readFileSync(filePath).toString())
-    res.json(data)
+    return res.json(data)
 }

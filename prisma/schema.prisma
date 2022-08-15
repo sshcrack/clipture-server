@@ -43,6 +43,9 @@ model User {
   accounts      Account[]
   sessions      Session[]
   clips         Clip[]
+
+  // Weither this user is banned, only set to true manually yet.
+  banned        Boolean @default(false)
 }
 
 model VerificationToken {
@@ -53,12 +56,51 @@ model VerificationToken {
   @@unique([identifier, token])
 }
 
+model DiscordGame {
+  id        String @id @default(cuid())
+}
+
+model WindowInformation {
+  id          String  @id @default(cuid())
+
+  // User id by which this info has been reported
+  userId      String
+  clips       Clip[]
+
+  title       String
+
+  // Information of this application to add it to clipture later
+
+  className   String
+  executable  String
+
+  // Icon path
+  icon        String
+
+  @@unique([ className, executable ])
+}
 
 model Clip {
-  id          String  @id
-  storage     String
-  uploader    User @relation(fields: [uploaderId], references: [id])
-  uploaderId  String // relation scalar field  (used in the `@relation` attribute above)
-  uploadDate  DateTime
-  size        Int
+  id            String  @id
+
+  // The title of this clip
+  title         String
+
+  uploader      User @relation(fields: [uploaderId], references: [id])
+  uploaderId    String // relation scalar field  (used in the `@relation` attribute above)
+
+  // Game information
+
+  dcGameId      String?
+  windowInfo    WindowInformation? @relation(fields: [windowInfoId], references: [id])
+  windowInfoId  String?
+
+  // Size of this clip
+  size          Int
+
+  // Date when this clip got updated
+  uploadDate    DateTime
+
+  // Storage location of this clip
+  storage       String
 }

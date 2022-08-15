@@ -3,9 +3,10 @@ import formidable from "formidable"
 import { v4 as uuid } from "uuid"
 import { StorageManager } from "../../../util/storage";
 import { getSession } from "next-auth/react";
-import { getUserId, prisma } from "../../../util/db";
+import { checkBanned, getUserId, prisma } from "../../../util/db";
 import { PlainResponse } from "got/dist/source/core";
 
+type DataClips = Parameters<typeof prisma["clip"]["create"]>["0"]["data"]
 export const config = {
     api: {
         bodyParser: false
@@ -25,11 +26,6 @@ export default async function Upload(req: NextApiRequest, res: NextApiResponse) 
     const session = await getSession({ req })
     if(!session)
         return res.status(403).json({ error: "Unauthenticated."})
-
-
-    const userId = getUserId(session)
-    if(!userId)
-        return res.status(500).json({ error : "Could not get user id"})
 
     const fileSizeStr = req.query.fileSize
     if (req.method !== "POST")
@@ -61,6 +57,13 @@ export default async function Upload(req: NextApiRequest, res: NextApiResponse) 
         console.error(statErr)
         return res.status(500).json({ error: "Could not get current storage stats." })
     }
+
+    const userId = getUserId(session)
+    if(!userId)
+        return res.status(500).json({ error : "Could not get user id"})
+
+    if(await checkBanned(userId, res))
+        return
 
     const totalClipSize = await prisma.clip.aggregate({
         where: {
@@ -131,8 +134,8 @@ export default async function Upload(req: NextApiRequest, res: NextApiResponse) 
                 size: fileSize,
                 uploaderId: userId,
                 storage: storageAddr,
-                uploadDate: new Date().toISOString()
-            }
+                uploadDate: new Date().toISOString(),
+            } as DataClips
 
             console.log("Adding new Clip", JSON.stringify(data, null, 2))
             await prisma.clip.create({ data: data })

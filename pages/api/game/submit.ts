@@ -1,8 +1,7 @@
+import formidable from "formidable";
 import { NextApiRequest, NextApiResponse } from "next";
-import formidable from "formidable"
-import { getUserId, checkBanned, prisma } from "../../../util/db";
-import { getSession } from "next-auth/react";
-import { isRegExp } from "util/types";
+import getServerUser from "../../../util/auth";
+import { checkBanned } from "../../../util/db";
 
 export const config = {
     api: {
@@ -10,14 +9,11 @@ export const config = {
     }
 };
 export default async function SubmitGame(req: NextApiRequest, res: NextApiResponse) {
-    const session = await getSession()
-    if(!session)
+    const user = await getServerUser(req, res)
+    if(!user)
         return res.status(403).json({ error: "Unauthenticated."})
 
-    const userId = getUserId(session)
-    if(!userId)
-        return res.status(500).json({ error: "Could not get user id." })
-    if(await checkBanned(userId, res))
+    if(await checkBanned(user.id, res))
         return
 
     const form = new formidable.IncomingForm({

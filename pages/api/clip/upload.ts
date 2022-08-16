@@ -1,10 +1,10 @@
-import { NextApiRequest, NextApiResponse } from "next";
-import formidable from "formidable"
-import { v4 as uuid } from "uuid"
-import { StorageManager } from "../../../util/storage";
-import { getSession } from "next-auth/react";
-import { checkBanned, getUserId, prisma } from "../../../util/db";
+import formidable from "formidable";
 import { PlainResponse } from "got/dist/source/core";
+import { NextApiRequest, NextApiResponse } from "next";
+import { v4 as uuid } from "uuid";
+import getServerUser from "../../../util/auth";
+import { checkBanned, prisma } from "../../../util/db";
+import { StorageManager } from "../../../util/storage";
 
 type DataClips = Parameters<typeof prisma["clip"]["create"]>["0"]["data"]
 export const config = {
@@ -23,9 +23,12 @@ StorageManager.initialize()
 const maxSize = StorageManager.getMaxClipSize()
 
 export default async function Upload(req: NextApiRequest, res: NextApiResponse) {
-    const session = await getSession({ req })
-    if(!session)
+    const user = await getServerUser(req, res)
+    if(!user)
         return res.status(403).json({ error: "Unauthenticated."})
+
+    if(await checkBanned(user.id, res))
+        return
 
     const fileSizeStr = req.query.fileSize
     if (req.method !== "POST")
@@ -58,23 +61,16 @@ export default async function Upload(req: NextApiRequest, res: NextApiResponse) 
         return res.status(500).json({ error: "Could not get current storage stats." })
     }
 
-    const userId = getUserId(session)
-    if(!userId)
-        return res.status(500).json({ error : "Could not get user id"})
-
-    if(await checkBanned(userId, res))
-        return
-
     const totalClipSize = await prisma.clip.aggregate({
         where: {
-            uploaderId: userId
+            uploaderId: user.id
         },
         _sum: {
             size: true
         }
     }).then(e => e._sum.size ?? 0)
 
-    console.log("User", userId, "with size", totalClipSize)
+    console.log("User", user.id, "with size", totalClipSize)
     if(totalClipSize + fileSize > uploadLimit)
         return res.status(403).json({ error: "Max upload size exceeded."})
 
@@ -132,7 +128,7 @@ export default async function Upload(req: NextApiRequest, res: NextApiResponse) 
             const data = {
                 id,
                 size: fileSize,
-                uploaderId: userId,
+                uploaderId: user.id,
                 storage: storageAddr,
                 uploadDate: new Date().toISOString(),
             } as DataClips

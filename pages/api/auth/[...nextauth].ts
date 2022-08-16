@@ -5,7 +5,7 @@ import { PrismaClient } from "@prisma/client"
 
 const prisma = new PrismaClient()
 
-const options: NextAuthOptions = {
+export const nextOptions: NextAuthOptions = {
     // Configure one or more authentication providers
     providers: [
         DiscordProvider({
@@ -28,4 +28,4 @@ const options: NextAuthOptions = {
     }
 }
 
-export default NextAuth(options)
+export default NextAuth(nextOptions)

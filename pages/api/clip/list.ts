@@ -1,19 +1,19 @@
 import { NextApiRequest, NextApiResponse } from "next";
-import { getSession } from "next-auth/react";
-import { checkBanned, getUserId, prisma } from "../../../util/db";
+import getServerUser from "../../../util/auth";
+import { checkBanned, prisma } from "../../../util/db";
 
 export default async function ListClips(req: NextApiRequest, res: NextApiResponse) {
-    const session = await getSession({ req })
-    if(!session)
+    const user = await getServerUser(req, res)
+    if(!user)
         return res.status(403).json({ error: "Unauthenticated."})
 
-    const userId = getUserId(session)
-    if(await checkBanned(userId, res))
+    if(await checkBanned(user.id, res))
         return
+
 
     const clips = await prisma.clip.findMany({
         where: {
-            uploaderId: userId
+            uploaderId: user.id
         }
     })
 

@@ -2,9 +2,13 @@ import { StorageInfo } from "./interface"
 import got from "got"
 import { Clip } from "@prisma/client"
 
-const allStorages = process.env.STORAGES
-const STORAGE_SECRET = process.env.STORAGE_SECRET
-const MAX_SIZE = process.env.MAX_CLIP_SIZE
+const {
+    STORAGES: allStorages,
+    STORAGE_SECRET,
+    MAX_CLIP_SIZE: MAX_SIZE,
+    MIN_DURATION,
+    MAX_DURATION
+} = process.env
 
 export class StorageManager {
     private static storageInfo = [] as StorageInfo[]
@@ -18,6 +22,29 @@ export class StorageManager {
             throw new Error("Max Size has to be set.")
         }
         return parseInt(MAX_SIZE)
+
+
+    }
+
+    static getMinMax() {
+        if(typeof MIN_DURATION !== "string" || typeof MAX_DURATION !== "string") {
+            console.error("MIN_DURATION and/or MAX_DURATION has to be set in .env")
+            process.exit(1)
+        }
+
+        if(isNaN(MIN_DURATION as any) || isNaN(MAX_DURATION as any)) {
+            console.error("MIN_DURATION and MAX_DURATION have to be a number.")
+            process.exit(-1)
+        }
+
+        return [ parseFloat(MIN_DURATION), parseFloat(MAX_DURATION)]
+    }
+
+    static async setMinMax(add: string[]) {
+        const [ min, max ] = this.getMinMax()
+
+        const p = add.map(e => got(`${e}/set?min=${min}&max=${max}&secret=${STORAGE_SECRET}`))
+        return Promise.all(p)
     }
 
     static async initialize() {
@@ -29,6 +56,7 @@ export class StorageManager {
             throw new Error(`STORAGES have to be set to at least one address.`)
         this.addresses = addressSplit
 
+        this.setMinMax(addressSplit)
         const prom = this.getStorageStats()
         this.storageStatsProm = prom
     }

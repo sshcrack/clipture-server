@@ -16,6 +16,10 @@ export class StorageManager {
     private static storageStatsProm = Promise.resolve()
     private static currentlyChecking = false
 
+    static reinitialize(addr: string) {
+        this.setMinMax([addr])
+    }
+
     static getMaxClipSize() {
         if(!MAX_SIZE) {
             console.error("MAX_CLIP_SIZE has to be set.")
@@ -119,7 +123,6 @@ export class StorageManager {
             this.getStorageStats()
             console.log("Stream end.")
         })
-        console.log("Writable", stream.writable)
         return { stream, address }
     }
 

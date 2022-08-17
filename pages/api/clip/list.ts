@@ -17,9 +17,10 @@ export default async function ListClips(req: NextApiRequest, res: NextApiRespons
         }
     })
 
-    const filteredInfo = clips.map(({ id, uploadDate}) => ({
+    const filteredInfo = clips.map(({ id, uploadDate, title}) => ({
         id,
-        uploadDate
+        uploadDate,
+        title
     }))
 
     res.json(filteredInfo)

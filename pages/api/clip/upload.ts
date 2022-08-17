@@ -1,6 +1,8 @@
 import formidable from "formidable";
 import { PlainResponse } from "got/dist/source/core";
 import { NextApiRequest, NextApiResponse } from "next";
+import {promisify} from 'node:util';
+import stream from 'node:stream';
 import { v4 as uuid } from "uuid";
 import getServerUser from "../../../util/auth";
 import { checkBanned, prisma } from "../../../util/db";
@@ -22,6 +24,8 @@ if(!uploadLimit) {
 StorageManager.initialize()
 const maxSize = StorageManager.getMaxClipSize()
 
+
+const pipeline = promisify(stream.pipeline);
 export default async function Upload(req: NextApiRequest, res: NextApiResponse) {
     const user = await getServerUser(req, res)
     if(!user)
@@ -34,6 +38,13 @@ export default async function Upload(req: NextApiRequest, res: NextApiResponse) 
     if (req.method !== "POST")
         return res.status(400).json({
             error: "Method has to be POST to upload files."
+        })
+
+
+    const title = req.query.title
+    if (typeof title !== "string" || title?.length > 50 )
+        return res.status(400).json({
+            error: "Title has to be a string and cannot be longer than 50 characters"
         })
 
     if (typeof fileSizeStr !== "string")
@@ -75,7 +86,7 @@ export default async function Upload(req: NextApiRequest, res: NextApiResponse) 
         return res.status(403).json({ error: "Max upload size exceeded."})
 
     const id = uuid()
-    let responseProm = undefined as Promise<PlainResponse> | undefined
+    let responseProm = undefined as Promise<PlainResponse | undefined> | undefined
     let storageAddr = undefined as string | undefined
     const form = new formidable.IncomingForm({
         allowEmptyFiles: false,
@@ -86,23 +97,25 @@ export default async function Upload(req: NextApiRequest, res: NextApiResponse) 
             if(responseProm)
                 throw new Error("Cannot upload more than one file.")
 
-            const { stream, address } = StorageManager.getWriteStream(fileSize, id)
+            const { stream: gotStr, address } = StorageManager.getWriteStream(fileSize, id)
 
             storageAddr = address
-            responseProm = new Promise<PlainResponse>((resolve, reject) => {
-                let found = false
-                stream?.on("response", e => {
+            responseProm = new Promise<PlainResponse | undefined>(resolve => {
+                gotStr?.on("response", e => {
                     console.log("Response found")
                     resolve(e)
-                    found = true
                 })
-                stream?.on("close", () => {
-                    if(!found)
-                        reject(new Error("Response could be obtained."))
+                gotStr?.on("close", () => {
+                    //resolve(undefined)
+                    console.log("Stream closed.")
+                })
+                gotStr?.on("error", e=> {
+                    //@ts-ignore
+                    resolve(e.response)
                 })
             })
 
-            return stream
+            return gotStr
         }
     });
 
@@ -117,16 +130,27 @@ export default async function Upload(req: NextApiRequest, res: NextApiResponse) 
                 return res.status(500).json({ error: "Could not store file."})
 
             console.log("Waiting for response...")
-            const response = await (responseProm ?? Promise.resolve(undefined))
+            const response = await (responseProm ?? Promise.resolve(undefined)).catch(e => {
+                console.log("Error is", e)
+                return e.response
+            }) as PlainResponse
+
             console.log("Done.")
             if(!response || response.statusCode !== 200) {
-                console.log("Invalid response", response?.statusCode, response?.body)
                 resolve()
-                return res.status(500).json({ error: "Could process clip."})
+                if(response.statusCode === 500)
+                    return res.status(500).json({ error: "Could process clip."})
+                try {
+                    const json = JSON.parse(response.body as string)
+                    if(json?.error?.includes("Validator has not been initialized"))
+                        StorageManager.reinitialize(storageAddr)
+                } catch(e) {}
+                return res.status(response.statusCode).json(response.body)
             }
 
             const data = {
                 id,
+                title,
                 size: fileSize,
                 uploaderId: user.id,
                 storage: storageAddr,

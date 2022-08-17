@@ -19,7 +19,7 @@ export default function PrivatePage() {
         body.append("file", image as File)
         console.log("Body is", body, image)
         let request = new XMLHttpRequest();
-        request.open('POST', `/api/clip/upload?fileSize=${(image as File).size}`);
+        request.open('POST', `/api/clip/upload?fileSize=${(image as File).size}&title=${image?.name.replace(".clipped", "").replace(".mp4", "")}`);
 
         // upload progress event
         request.upload.addEventListener('progress', function (e) {

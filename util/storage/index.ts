@@ -126,12 +126,10 @@ export class StorageManager {
         return { stream, address }
     }
 
-    static streamVideo({ storage, id}: Clip, range?: string | string[]) {
-        const url = `${storage}/get/${id}?secret=${STORAGE_SECRET}`
-        return got.stream(url, {
-            headers: range ? {
-                "Range": range
-            } : {}
-        })
+    static getVideoUrl({ storage, id}: Clip) {
+        const index = this.addresses.findIndex(e => e === storage)
+        if(index === -1)
+            return undefined
+        return `/api/clip/get/cdn/${index}/${id}`
     }
 }

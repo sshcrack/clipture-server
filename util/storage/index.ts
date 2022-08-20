@@ -22,7 +22,7 @@ export class StorageManager {
     }
 
     static getMaxClipSize() {
-        if(!MAX_SIZE) {
+        if (!MAX_SIZE) {
             console.error("MAX_CLIP_SIZE has to be set.")
             throw new Error("Max Size has to be set.")
         }
@@ -32,28 +32,28 @@ export class StorageManager {
     }
 
     static getMinMax() {
-        if(typeof MIN_DURATION !== "string" || typeof MAX_DURATION !== "string") {
+        if (typeof MIN_DURATION !== "string" || typeof MAX_DURATION !== "string") {
             console.error("MIN_DURATION and/or MAX_DURATION has to be set in .env")
             process.exit(1)
         }
 
-        if(isNaN(MIN_DURATION as any) || isNaN(MAX_DURATION as any)) {
+        if (isNaN(MIN_DURATION as any) || isNaN(MAX_DURATION as any)) {
             console.error("MIN_DURATION and MAX_DURATION have to be a number.")
             process.exit(-1)
         }
 
-        return [ parseFloat(MIN_DURATION), parseFloat(MAX_DURATION)]
+        return [parseFloat(MIN_DURATION), parseFloat(MAX_DURATION)]
     }
 
     static async setMinMax(add: string[]) {
-        const [ min, max ] = this.getMinMax()
+        const [min, max] = this.getMinMax()
 
         const p = add.map(e => got(`${e}/set?min=${min}&max=${max}&secret=${STORAGE_SECRET}`))
         return Promise.all(p)
     }
 
     static async initialize() {
-        if(this.initialized)
+        if (this.initialized)
             return
 
         this.initialized = true
@@ -131,21 +131,21 @@ export class StorageManager {
         return { stream, address }
     }
 
-    static getVideoUrl({ storage, id}: Clip) {
+    static getVideoUrl({ storage, id }: Clip) {
         const index = this.addresses.findIndex(e => e === storage)
-        if(index === -1)
+        if (index === -1)
             return undefined
         return `/api/clip/get/cdn/${index}/${id}`
     }
 
-    static async clipExists(c: Clip) {
-        const url = this.getVideoUrl(c)
-        if(!url)
-            return false
+    static async clipExists({ storage, id }: Clip) {
+        const index = this.addresses.findIndex(e => e === storage)
+        if (index === -1)
+            return undefined
 
-        const head = await got(url, { method: "HEAD", throwHttpErrors: false })
+        const head = await got(`${storage}/get/${id}?secret=${STORAGE_SECRET}`, { method: "HEAD", throwHttpErrors: false })
         const res = head.statusCode === 200
-        if(!res)
+        if (!res)
             console.log(head.statusCode, head.headers)
 
         return res

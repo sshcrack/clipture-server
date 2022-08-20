@@ -1,5 +1,5 @@
 import { StorageInfo } from "./interface"
-import got from "got"
+import got, { PlainResponse } from "got"
 import { Clip } from "@prisma/client"
 
 const {
@@ -136,5 +136,18 @@ export class StorageManager {
         if(index === -1)
             return undefined
         return `/api/clip/get/cdn/${index}/${id}`
+    }
+
+    static async clipExists(c: Clip) {
+        const url = this.getVideoUrl(c)
+        if(!url)
+            return false
+
+        const head = await got(url, { method: "HEAD"}).catch(e => e.response as PlainResponse)
+        const res = head.statusCode === 200
+        if(!res)
+            console.log(head.statusCode, head.headers)
+
+        return res
     }
 }

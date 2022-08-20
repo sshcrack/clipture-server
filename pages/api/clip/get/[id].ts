@@ -25,5 +25,11 @@ export default async function GetClip(req: NextApiRequest, res: NextApiResponse)
     if(!url)
         return res.status(500).json({ error: "Storage could not be found."})
 
+    const exists = await StorageManager.clipExists(clip)
+    if(!exists) {
+        prisma.clip.delete({ where: { id: clip.id }})
+        return res.status(404).json({ error: "That clip does not exist. "})
+    }
+
     return res.redirect(302, url)
 }

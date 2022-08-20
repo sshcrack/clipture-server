@@ -15,6 +15,7 @@ export class StorageManager {
     private static addresses = [] as string[]
     private static storageStatsProm = Promise.resolve()
     private static currentlyChecking = false
+    private static initialized = false
 
     static reinitialize(addr: string) {
         this.setMinMax([addr])
@@ -52,6 +53,10 @@ export class StorageManager {
     }
 
     static async initialize() {
+        if(this.initialized)
+            return
+
+        this.initialized = true
         const addressSplit = allStorages?.split(",")
             .map(e => e.split(" ").join(""))
 

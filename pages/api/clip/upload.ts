@@ -1,8 +1,6 @@
 import formidable from "formidable";
 import { PlainResponse } from "got/dist/source/core";
 import { NextApiRequest, NextApiResponse } from "next";
-import {promisify} from 'node:util';
-import stream from 'node:stream';
 import { v4 as uuid } from "uuid";
 import getServerUser from "../../../util/auth";
 import { checkBanned, prisma } from "../../../util/db";
@@ -24,8 +22,6 @@ if(!uploadLimit) {
 StorageManager.initialize()
 const maxSize = StorageManager.getMaxClipSize()
 
-
-const pipeline = promisify(stream.pipeline);
 export default async function Upload(req: NextApiRequest, res: NextApiResponse) {
     const user = await getServerUser(req)
     if(!user)

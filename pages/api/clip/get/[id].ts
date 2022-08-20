@@ -1,8 +1,8 @@
-import { HTTPError } from "got/dist/source";
 import { NextApiRequest, NextApiResponse } from "next";
 import { prisma } from "../../../../util/db";
 import { StorageManager } from "../../../../util/storage";
 
+StorageManager.initialize()
 export default async function GetClip(req: NextApiRequest, res: NextApiResponse) {
     const { id } = req.query
     if(!id)

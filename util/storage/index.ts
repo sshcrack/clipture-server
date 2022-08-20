@@ -143,7 +143,7 @@ export class StorageManager {
         if(!url)
             return false
 
-        const head = await got(url, { method: "HEAD"}).catch(e => e.response as PlainResponse)
+        const head = await got(url, { method: "HEAD", throwHttpErrors: false })
         const res = head.statusCode === 200
         if(!res)
             console.log(head.statusCode, head.headers)

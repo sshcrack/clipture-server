@@ -13,8 +13,8 @@ const proxyPass = addressSplit.map((e, i) => {
     return `
 # reverse proxy
 location /api/clip/get/cdn/${i}/ {
-    rewrite ^ /?secret=${STORAGE_SECRET} break;
-    proxy_pass ${e}/get;
+    rewrite  ^/api/clip/get/cdn/${i}/(.+)$ /get/$1?secret=${STORAGE_SECRET} break;
+    proxy_pass ${e}/get/;
     include    nginxconfig.io/proxy.conf;
 }`
 }).join("\n")

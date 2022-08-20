@@ -27,7 +27,7 @@ export default async function GetClip(req: NextApiRequest, res: NextApiResponse)
 
     const exists = await StorageManager.clipExists(clip)
     if(!exists) {
-        prisma.clip.delete({ where: { id: clip.id }})
+        await prisma.clip.delete({ where: { id: clip.id }})
         return res.status(404).json({ error: "That clip does not exist. "})
     }
 

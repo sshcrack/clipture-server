@@ -3,7 +3,7 @@ import getServerUser from "../../../util/auth";
 import { checkBanned, prisma } from "../../../util/db";
 
 export default async function ListClips(req: NextApiRequest, res: NextApiResponse) {
-    const user = await getServerUser(req, res)
+    const user = await getServerUser(req)
     if(!user)
         return res.status(403).json({ error: "Unauthenticated."})
 

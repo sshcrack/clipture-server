@@ -9,7 +9,7 @@ export const config = {
     }
 };
 export default async function SubmitGame(req: NextApiRequest, res: NextApiResponse) {
-    const user = await getServerUser(req, res)
+    const user = await getServerUser(req)
     if(!user)
         return res.status(403).json({ error: "Unauthenticated."})
 

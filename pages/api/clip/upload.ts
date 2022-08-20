@@ -27,7 +27,7 @@ const maxSize = StorageManager.getMaxClipSize()
 
 const pipeline = promisify(stream.pipeline);
 export default async function Upload(req: NextApiRequest, res: NextApiResponse) {
-    const user = await getServerUser(req, res)
+    const user = await getServerUser(req)
     if(!user)
         return res.status(403).json({ error: "Unauthenticated."})
 

@@ -2,7 +2,7 @@ import { NextApiRequest } from "next";
 import { prisma } from "./db";
 
 export default async function getServerUser(req: NextApiRequest) {
-    const sessionToken = req.cookies?.["next-auth.session-token"]
+    const sessionToken = req.cookies?.["next-auth.session-token"] ?? req.cookies?.["__Secure-next-auth.session-token"]
     if(!sessionToken)
         return null;
 

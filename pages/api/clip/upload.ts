@@ -1,12 +1,16 @@
 import formidable from "formidable";
 import { PlainResponse } from "got/dist/source/core";
 import { NextApiRequest, NextApiResponse } from "next";
+import os from "os";
+import { spawn } from "child_process"
+import path from 'path';
 import { v4 as uuid } from "uuid";
 import getServerUser from "../../../util/auth";
 import { checkBanned, prisma } from "../../../util/db";
+import { getDetectableGames } from '../../../util/detection';
 import { StorageManager } from "../../../util/storage";
+import { writeFile } from 'fs/promises';
 
-type DataClips = Parameters<typeof prisma["clip"]["create"]>["0"]["data"]
 export const config = {
     api: {
         bodyParser: false
@@ -14,7 +18,10 @@ export const config = {
 };
 
 const uploadLimit = parseInt(process.env.LIMIT_PER_USER as string)
-if(!uploadLimit) {
+const maxInfoLength = 80
+const submissionLimit = 15
+
+if (!uploadLimit) {
     console.error("Byte limit per user has to be set. currently is", uploadLimit)
     process.exit(-1)
 }
@@ -24,10 +31,10 @@ const maxSize = StorageManager.getMaxClipSize()
 
 export default async function Upload(req: NextApiRequest, res: NextApiResponse) {
     const user = await getServerUser(req)
-    if(!user)
-        return res.status(403).json({ error: "Unauthenticated."})
+    if (!user)
+        return res.status(403).json({ error: "Unauthenticated." })
 
-    if(await checkBanned(user.id, res))
+    if (await checkBanned(user.id, res))
         return
 
     const fileSizeStr = req.query.fileSize
@@ -38,7 +45,7 @@ export default async function Upload(req: NextApiRequest, res: NextApiResponse) 
 
 
     const title = req.query.title
-    if (typeof title !== "string" || title?.length > 50 )
+    if (typeof title !== "string" || title?.length > 50)
         return res.status(400).json({
             error: "Title has to be a string and cannot be longer than 50 characters"
         })
@@ -78,8 +85,8 @@ export default async function Upload(req: NextApiRequest, res: NextApiResponse) 
     }).then(e => e._sum.size ?? 0)
 
     console.log("User", user.id, "with size", totalClipSize)
-    if(totalClipSize + fileSize > uploadLimit)
-        return res.status(403).json({ error: "Max upload size exceeded."})
+    if (totalClipSize + fileSize > uploadLimit)
+        return res.status(403).json({ error: "Max upload size exceeded." })
 
     const id = uuid()
     let responseProm = undefined as Promise<PlainResponse | undefined> | undefined
@@ -90,7 +97,7 @@ export default async function Upload(req: NextApiRequest, res: NextApiResponse) 
         maxFileSize: fileSize,
         fileWriteStreamHandler: () => {
             console.log("Writing file with fileSize", fileSize)
-            if(responseProm)
+            if (responseProm)
                 throw new Error("Cannot upload more than one file.")
 
             const { stream: gotStr, address } = StorageManager.getWriteStream(fileSize, id)
@@ -105,7 +112,7 @@ export default async function Upload(req: NextApiRequest, res: NextApiResponse) 
                     //resolve(undefined)
                     console.log("Stream closed.")
                 })
-                gotStr?.on("error", e=> {
+                gotStr?.on("error", e => {
                     //@ts-ignore
                     resolve(e.response)
                 })
@@ -116,14 +123,14 @@ export default async function Upload(req: NextApiRequest, res: NextApiResponse) 
     });
 
     await new Promise<void>(resolve => {
-        form.parse(req, async (err) => {
+        form.parse(req, async (err, fields) => {
             if (err) {
                 resolve()
                 console.error(err)
                 return res.status(500).json({ error: "Could not parse body." })
             }
-            if(!storageAddr)
-                return res.status(500).json({ error: "Could not store file."})
+            if (!storageAddr)
+                return res.status(500).json({ error: "Could not store file." })
 
             console.log("Waiting for response...")
             const response = await (responseProm ?? Promise.resolve(undefined)).catch(e => {
@@ -132,29 +139,108 @@ export default async function Upload(req: NextApiRequest, res: NextApiResponse) 
             }) as PlainResponse
 
             console.log("Done.")
-            if(!response || response.statusCode !== 200) {
+            if (!response || response.statusCode !== 200) {
                 resolve()
-                if(response.statusCode === 500)
-                    return res.status(500).json({ error: "Could process clip."})
+                if (response.statusCode === 500)
+                    return res.status(500).json({ error: "Could process clip." })
                 try {
                     const json = JSON.parse(response.body as string)
-                    if(json?.error?.includes("Validator has not been initialized"))
+                    if (json?.error?.includes("Validator has not been initialized"))
                         StorageManager.reinitialize(storageAddr)
-                } catch(e) {}
+                } catch (e) { }
                 return res.status(response.statusCode).json(response.body)
             }
 
-            const data = {
-                id,
-                title,
-                size: fileSize,
-                uploaderId: user.id,
-                storage: storageAddr,
-                uploadDate: new Date().toISOString(),
-            } as DataClips
+            let dcGameId = fields?.["discordGameId"] as string | null
+            if (typeof dcGameId !== "string")
+                dcGameId = null
 
-            console.log("Adding new Clip", JSON.stringify(data, null, 2))
-            await prisma.clip.create({ data: data })
+            if (dcGameId) {
+                const detectable = await getDetectableGames()
+                const hasGameId = detectable.some(e => e.id === dcGameId)
+                if (!hasGameId)
+                    dcGameId = null
+            }
+
+            const className = fields?.["windowInformationClassName"]
+            const executable = fields?.["windowInformationExecutable"]
+            const windowTitle = fields?.["windowInformationTitle"]
+            const icon = fields?.["windowInformationIcon"]
+
+            let windowInfoId: string | null = null
+
+            const typeValid = typeof className === "string" && typeof executable === "string" && typeof windowTitle === "string" && typeof icon === "string"
+            if (typeValid) {
+                const classNameShortened = className.substring(0, maxInfoLength)
+                const executableShortened = executable.substring(0, maxInfoLength)
+                const windowTitleShortened = windowTitle.substring(0, maxInfoLength)
+                const existsAlready = await prisma.windowInformation.findFirst({
+                    where: {
+                        className: classNameShortened,
+                        executable: executableShortened
+                    }
+                })
+
+                const posted = await prisma.windowInformation.count({ where: { userId: user.id } })
+
+                if (icon.length < 524300 && !existsAlready && posted < submissionLimit) {
+                    const iconBuffer = Buffer.from(icon, "hex")
+                    const tempFile = path.join(os.tmpdir(), uuid() + ".ico")
+                    const pngOut = path.join(process.cwd(), "icons", uuid() + ".png")
+
+                    await writeFile(tempFile, iconBuffer)
+                    console.log("Converting", tempFile, "to", pngOut)
+                    const prom = new Promise<void>((resolve, reject) => {
+                        spawn("convert", [tempFile, "-resize", "32", pngOut])
+                            .on("close", () => resolve())
+                            .on("error", e => reject(e))
+                    });
+
+                    const res = await prom
+                        .then(() => true)
+                        .catch(() => false)
+
+                    if (res) {
+                        console.log("Submitted window information with", {
+                            className: classNameShortened,
+                            executable: executableShortened,
+                            icon: pngOut,
+                            title: windowTitleShortened,
+                            userId: user.id
+                        })
+
+                        const winInfo = await prisma.windowInformation.create({
+                            data: {
+                                className: classNameShortened,
+                                executable: executableShortened,
+                                icon: pngOut,
+                                title: windowTitleShortened,
+                                userId: user.id
+                            }
+                        })
+                        windowInfoId = winInfo.id
+                    } else {
+                        console.log("Invalid icon")
+                    }
+                } else {
+                    console.log("Icon is too large")
+                }
+            }
+
+            const creatRes = await prisma.clip.create({
+                data: {
+                    id,
+                    title,
+                    size: fileSize,
+                    uploaderId: user.id,
+                    storage: storageAddr,
+                    dcGameId,
+                    uploadDate: new Date().toISOString(),
+                    windowInfoId: windowInfoId
+                }
+            })
+
+            console.log("Adding new Clip", JSON.stringify(creatRes, null, 2))
 
             res.json({ fileSize, id })
             resolve()

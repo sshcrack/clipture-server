@@ -1,6 +1,7 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import getServerUser from "../../../util/auth";
 import { checkBanned, prisma } from "../../../util/db";
+import path from "path"
 
 export default async function ListClips(req: NextApiRequest, res: NextApiResponse) {
     const user = await getServerUser(req)
@@ -23,7 +24,12 @@ export default async function ListClips(req: NextApiRequest, res: NextApiRespons
         uploadDate,
         title,
         dcGameId,
-        windowInfo
+        windowInfo: windowInfo ? {
+            id: windowInfo.id,
+            userId: windowInfo.userId,
+            title: windowInfo.title,
+            icon: path.basename(windowInfo.icon)
+        } : null
     }))
 
     res.json(filteredInfo)

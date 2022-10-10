@@ -2,6 +2,7 @@
 
 **/migrations/
 migration_lock.toml
+icons
 
 **/*.db
 # dependencies

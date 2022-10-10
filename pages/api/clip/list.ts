@@ -19,16 +19,17 @@ export default async function ListClips(req: NextApiRequest, res: NextApiRespons
         include: { windowInfo: true }
     })
 
-    const filteredInfo = clips.map(({ id, uploadDate, title, dcGameId, windowInfo }) => ({
+    const filteredInfo = clips.map(({ id, uploadDate, title, dcGameId, windowInfo, hex }) => ({
         id,
         uploadDate,
         title,
         dcGameId,
+        hex,
         windowInfo: windowInfo ? {
             id: windowInfo.id,
             userId: windowInfo.userId,
             title: windowInfo.title,
-            icon: path.basename(windowInfo.icon)
+            icon: path.basename(windowInfo.icon),
         } : null
     }))
 

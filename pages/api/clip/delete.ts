@@ -1,7 +1,7 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import getServerUser from "../../../util/auth";
 import { checkBanned, prisma } from "../../../util/db";
-import got from "got"
+import { StorageManager } from '../../../util/storage';
 
 export default async function ListClips(req: NextApiRequest, res: NextApiResponse) {
     const user = await getServerUser(req)
@@ -27,7 +27,7 @@ export default async function ListClips(req: NextApiRequest, res: NextApiRespons
         return res.status(404).json({ error: "Clip could not be found. / No permission to delete" })
 
     const { storage } = clip
-    await got(`${storage}/delete?id=${id}`)
+    await StorageManager.delete(id, storage)
         .catch(e => {
             console.error(e)
             return res.status(500).json({ error: "Internal server error. Could not delete video." })

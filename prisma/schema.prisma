@@ -103,4 +103,6 @@ model Clip {
 
   // Storage location of this clip
   storage       String
+
+  hex           String
 }

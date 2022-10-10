@@ -91,6 +91,7 @@ export default async function Upload(req: NextApiRequest, res: NextApiResponse) 
     const id = uuid()
     let responseProm = undefined as Promise<PlainResponse | undefined> | undefined
     let storageAddr = undefined as string | undefined
+    let chunks = [] as Buffer[]
     const form = new formidable.IncomingForm({
         allowEmptyFiles: false,
         maxFiles: 1,
@@ -104,18 +105,17 @@ export default async function Upload(req: NextApiRequest, res: NextApiResponse) 
 
             storageAddr = address
             responseProm = new Promise<PlainResponse | undefined>(resolve => {
-                gotStr?.on("response", e => {
-                    console.log("Response found")
-                    resolve(e)
+                gotStr?.on("response", (e: PlainResponse) => {
+                    e.on("close", () => resolve(e))
+                    e.on("end", () => resolve(e))
+                    e.on("error", () => resolve(e))
+
+                    if (e.complete)
+                        resolve(e)
                 })
-                gotStr?.on("close", () => {
-                    //resolve(undefined)
-                    console.log("Stream closed.")
-                })
-                gotStr?.on("error", e => {
-                    //@ts-ignore
-                    resolve(e.response)
-                })
+                gotStr.on("data", e => chunks.push(e))
+                gotStr?.on("close", () => resolve(undefined))
+                gotStr?.on("error", (e: Error & { response: PlainResponse }) => resolve(e.response))
             })
 
             return gotStr
@@ -183,7 +183,8 @@ export default async function Upload(req: NextApiRequest, res: NextApiResponse) 
 
                 const posted = await prisma.windowInformation.count({ where: { userId: user.id } })
 
-                if (icon.length < 524300 && !existsAlready && posted < submissionLimit) {
+                const iconTooLarge = icon.length < 524300
+                if (iconTooLarge && !existsAlready && posted < submissionLimit) {
                     const iconBuffer = Buffer.from(icon, "hex")
                     const tempFile = path.join(os.tmpdir(), uuid() + ".ico")
                     const pngOut = path.join(process.cwd(), "icons", uuid() + ".png")
@@ -223,10 +224,20 @@ export default async function Upload(req: NextApiRequest, res: NextApiResponse) 
                         console.log("Invalid icon")
                     }
                 } else {
-                    console.log("Icon is too large")
+                    console.log("Icon is too large", iconTooLarge, "posted", posted < submissionLimit, "exists", existsAlready)
                 }
             }
 
+            const body = Buffer.concat(chunks.filter(e => e !== null)).toString("utf-8")
+            if (!body) {
+                console.log("Invalid response body", body)
+                StorageManager.delete(id, storageAddr)
+
+                return res.status(500).json({ error: "Could not process clip." })
+            }
+
+            console.log(body)
+            const { hex } = JSON.parse(body)
             const creatRes = await prisma.clip.create({
                 data: {
                     id,
@@ -236,13 +247,13 @@ export default async function Upload(req: NextApiRequest, res: NextApiResponse) 
                     storage: storageAddr,
                     dcGameId,
                     uploadDate: new Date().toISOString(),
-                    windowInfoId: windowInfoId
+                    windowInfoId,
+                    hex
                 }
             })
 
             console.log("Adding new Clip", JSON.stringify(creatRes, null, 2))
-
-            res.json({ fileSize, id })
+            res.json({ fileSize, id, hex })
             resolve()
         })
     })

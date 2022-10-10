@@ -114,6 +114,10 @@ export class StorageManager {
         return sorted?.[0]
     }
 
+    static delete(id: string, storage: string) {
+        return got(`${storage}/delete?id=${id}`, { throwHttpErrors: false})
+    }
+
     static getWriteStream(size: number, id: string) {
         const storage = this.getBestStorage()
         if (storage.sizeLeft < size)

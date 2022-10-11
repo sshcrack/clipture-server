@@ -27,11 +27,42 @@ export default async function ListClips(req: NextApiRequest, res: NextApiRespons
         return res.status(404).json({ error: "Clip could not be found. / No permission to delete" })
 
     const { storage } = clip
-    await StorageManager.delete(id, storage)
+    const deleted = await StorageManager.delete(id, storage)
+        .then(() => true)
         .catch(e => {
-            console.error(e)
-            return res.status(500).json({ error: "Internal server error. Could not delete video." })
+            const r = e?.response
+            if (!r) {
+                console.error("Error", r)
+                res.status(500).json({ error: "Internal server error. Could not delete video." })
+                return false
+            }
+
+            if (e.response.statusCode !== 404) {
+                console.error(e?.response?.body ?? e, e?.response?.statusCode)
+                res.status(500).json({ error: "Internal server error. Could not delete video." })
+                return false
+            }
+
+            console.log("DB mismatch, continuing")
+            return true
         })
+
+    if (!deleted)
+        return
+
+    console.log("Deleting from db...")
+    const prismaRes = await prisma.clip.delete({
+        where: {
+            id: id
+        },
+        include: {
+            uploader: false,
+            windowInfo: false
+        }
+    })
+
+    if (!prismaRes)
+        return res.status(500).json({ error: "Database mismatch" })
 
     res.json({ success: true })
 }

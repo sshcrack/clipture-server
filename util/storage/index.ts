@@ -1,6 +1,6 @@
-import { StorageInfo } from "./interface"
-import got, { PlainResponse } from "got"
 import { Clip } from "@prisma/client"
+import got, { OptionsOfJSONResponseBody } from "got"
+import { StorageInfo } from "./interface"
 
 const {
     STORAGES: allStorages,
@@ -114,8 +114,8 @@ export class StorageManager {
         return sorted?.[0]
     }
 
-    static delete(id: string, storage: string) {
-        return got(`${storage}/delete?id=${id}`, { throwHttpErrors: false})
+    static delete(id: string, storage: string, options?: OptionsOfJSONResponseBody) {
+        return got(`${storage}/delete?secret=${STORAGE_SECRET}&id=${id}`, options).json()
     }
 
     static getWriteStream(size: number, id: string) {

@@ -12,7 +12,7 @@ fs.mkdirSync(detectablePath, { recursive: true })
 
 export async function getDetectableGames(): Promise<DetectableGame[]> {
     const now = Date.now()
-    if (now - lastUpdated > updateInterval) {
+    if (now - lastUpdated > updateInterval || !fs.existsSync(filePath)) {
         lastUpdated = now
         const data = await got(apiRoute).then(e => JSON.parse(e.body))
         fs.writeFileSync(filePath, JSON.stringify(data))

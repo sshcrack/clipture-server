@@ -1,12 +1,19 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import getServerUser from "../../../util/auth";
 import { checkBanned, prisma } from "../../../util/db";
+import { GeneralError } from '../../../util/interfaces/error-codes';
+import { RateLimit } from '../../../util/rate-limit';
+import { ConsumeType } from '../../../util/rate-limit/interface';
+import { sendErrorResponse } from '../../../util/responses';
 
-export default async function ListClips(req: NextApiRequest, res: NextApiResponse) {
+export default async function RenameClips(req: NextApiRequest, res: NextApiResponse) {
     const user = await getServerUser(req)
     if (!user)
-        return res.status(403).json({ error: "Unauthenticated." })
+        return sendErrorResponse(res, GeneralError.UNAUTHENTICATED)
 
+    const isRateLimited = await RateLimit.consume(ConsumeType.Rename, req, res)
+    if (isRateLimited)
+        return
 
 
     const newTitle = req.query.title

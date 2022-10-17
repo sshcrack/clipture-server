@@ -1,20 +1,28 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import getServerUser from "../../../util/auth";
 import { checkBanned, prisma } from "../../../util/db";
+import { GeneralError } from '../../../util/interfaces/error-codes';
+import { RateLimit } from '../../../util/rate-limit';
+import { ConsumeType } from '../../../util/rate-limit/interface';
+import { sendErrorResponse } from '../../../util/responses';
 import { StorageManager } from '../../../util/storage';
+import { runChecks } from '../../../util/validators';
 
 export default async function ListClips(req: NextApiRequest, res: NextApiResponse) {
     const user = await getServerUser(req)
     if (!user)
-        return res.status(403).json({ error: "Unauthenticated." })
+        return sendErrorResponse(res, GeneralError.UNAUTHENTICATED)
 
     if (await checkBanned(user.id, res))
         return
 
-
+    const isRateLimited = await RateLimit.consume(ConsumeType.Delete, req, res)
+    if (isRateLimited)
+        return
+        
     const id = req.query?.id
     if (typeof id !== "string")
-        return res.status(400).json({ error: "Id has to be a string" })
+        return sendErrorResponse(res, GeneralError.ID_WRONG_TYPE)
 
     const clip = await prisma.clip.findFirst({
         where: {

@@ -109,6 +109,10 @@ export class StorageManager {
         return this.storageStatsProm
     }
 
+    static getStorages() {
+        return this.storageInfo.concat([])
+    }
+
     static getBestStorage() {
         const sorted = this.storageInfo.sort((a, b) => b.sizeLeft - a.sizeLeft)
         return sorted?.[0]

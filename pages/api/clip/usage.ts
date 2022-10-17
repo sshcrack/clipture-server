@@ -1,13 +1,16 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import getServerUser from "../../../util/auth";
 import { checkBanned, prisma } from "../../../util/db";
-import path from "path"
+import { GeneralError } from '../../../util/interfaces/error-codes';
 import { RateLimit } from '../../../util/rate-limit';
 import { ConsumeType } from '../../../util/rate-limit/interface';
 import { sendErrorResponse } from '../../../util/responses';
-import { GeneralError } from '../../../util/interfaces/error-codes';
 
-export default async function ListClips(req: NextApiRequest, res: NextApiResponse) {
+const { MAX_CLIP_SIZE, LIMIT_PER_USER } = process.env
+
+const maxClipInt = parseInt(MAX_CLIP_SIZE as string)
+const limitPerUser = parseInt(LIMIT_PER_USER as string)
+export default async function UsageClips(req: NextApiRequest, res: NextApiResponse) {
     const user = await getServerUser(req)
     if (!user)
         return sendErrorResponse(res, GeneralError.UNAUTHENTICATED)
@@ -15,7 +18,8 @@ export default async function ListClips(req: NextApiRequest, res: NextApiRespons
     if (await checkBanned(user.id, res))
         return
 
-    const isRateLimited = await RateLimit.consume(ConsumeType.List, req, res)
+
+    const isRateLimited = await RateLimit.consume(ConsumeType.Usage, req, res)
     if (isRateLimited)
         return
 
@@ -26,19 +30,9 @@ export default async function ListClips(req: NextApiRequest, res: NextApiRespons
         include: { windowInfo: true }
     })
 
-    const filteredInfo = clips.map(({ id, uploadDate, title, dcGameId, windowInfo, hex }) => ({
-        id,
-        uploadDate,
-        title,
-        dcGameId,
-        hex,
-        windowInfo: windowInfo ? {
-            id: windowInfo.id,
-            userId: windowInfo.userId,
-            title: windowInfo.title,
-            icon: path.basename(windowInfo.icon),
-        } : null
-    }))
-
-    res.json(filteredInfo)
+    return res.json({
+        maxClipSize: maxClipInt,
+        maxTotal: limitPerUser,
+        current: clips.reduce((a, b) => a + b.size, 0)
+    })
 }

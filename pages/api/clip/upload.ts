@@ -10,6 +10,11 @@ import { checkBanned, prisma } from "../../../util/db";
 import { getDetectableGames } from '../../../util/detection';
 import { StorageManager } from "../../../util/storage";
 import { writeFile } from 'fs/promises';
+import HttpStatusCode from '../../../util/status-codes';
+import { RateLimit } from '../../../util/rate-limit';
+import { ConsumeType } from '../../../util/rate-limit/interface';
+import { sendErrorResponse } from '../../../util/responses';
+import { GeneralError } from '../../../util/interfaces/error-codes';
 
 export const config = {
     api: {
@@ -32,9 +37,14 @@ const maxSize = StorageManager.getMaxClipSize()
 export default async function Upload(req: NextApiRequest, res: NextApiResponse) {
     const user = await getServerUser(req)
     if (!user)
-        return res.status(403).json({ error: "Unauthenticated." })
+        return sendErrorResponse(res, GeneralError.UNAUTHENTICATED)
 
     if (await checkBanned(user.id, res))
+        return
+
+
+    const isRateLimited = await RateLimit.consume(ConsumeType.Upload, req, res)
+    if (isRateLimited)
         return
 
     const fileSizeStr = req.query.fileSize
@@ -74,6 +84,11 @@ export default async function Upload(req: NextApiRequest, res: NextApiResponse) 
         console.error(statErr)
         return res.status(500).json({ error: "Could not get current storage stats." })
     }
+
+    const storages = StorageManager.getStorages()
+    const hasSpaceLeft = storages.find(e => e.sizeLeft > fileSize)
+    if (!hasSpaceLeft)
+        return res.status(HttpStatusCode.INSUFFICIENT_STORAGE).json({ error: "Not enough storage left :(" })
 
     const totalClipSize = await prisma.clip.aggregate({
         where: {

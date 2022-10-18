@@ -32,7 +32,11 @@ export class RateLimit {
         },
         {
             type: ConsumeType.Usage,
-            retries: 50
+            retries: 100
+        },
+        {
+            type: ConsumeType.Report,
+            retries: 10
         }
     ].map(e => {
         const obj: CostInterface<ConsumeType> = {

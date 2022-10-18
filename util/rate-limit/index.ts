@@ -12,7 +12,7 @@ const log = Logger.getLogger("RateLimiter")
 export class RateLimit {
     static instance: RateLimit = new RateLimit()
 
-    private limiterDuration = 60 * 1000
+    private limiterDuration = 60
     private limiters: CostInterface<ConsumeType>[] = [
         {
             type: ConsumeType.Delete,

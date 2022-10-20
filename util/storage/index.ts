@@ -140,7 +140,7 @@ export class StorageManager {
     }
 
     static getThumbnailStream({ id, storage }: Clip) {
-        return got.stream(`${storage}/thumbnail/${id}`)
+        return got.stream(`${storage}/thumbnail/${id}?secret=${STORAGE_SECRET}`, { throwHttpErrors: false })
     }
 
     static getVideoUrl({ storage, id }: Clip) {

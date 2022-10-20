@@ -241,6 +241,8 @@ export default async function Upload(req: NextApiRequest, res: NextApiResponse) 
                 } else {
                     console.log("Icon is too large", iconTooLarge, "posted", posted < submissionLimit, "exists", existsAlready)
                 }
+            } else {
+                console.log("Types not valid", className, executable, windowTitle, typeof icon)
             }
 
             const body = Buffer.concat(chunks.filter(e => e !== null)).toString("utf-8")

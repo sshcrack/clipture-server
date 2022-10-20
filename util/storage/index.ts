@@ -139,6 +139,10 @@ export class StorageManager {
         return { stream, address }
     }
 
+    static getThumbnailStream({ id, storage }: Clip) {
+        return got.stream(`${storage}/thumbnail/${id}`)
+    }
+
     static getVideoUrl({ storage, id }: Clip) {
         const index = this.addresses.findIndex(e => e === storage)
         if (index === -1)

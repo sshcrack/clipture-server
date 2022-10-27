@@ -1,6 +1,6 @@
 @font-face {
   font-family: "Quattrocento";
-  src: url("/font/Quattrocento.ttf") format("opentype");
+  src: url("/font/Quattrocento.ttf") format("truetype");
 }
 
 html,
@@ -23,4 +23,10 @@ a {
 #__next {
   width: 100%;
   height: 100%
+}
+
+.scale-text-center .scaletext-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }

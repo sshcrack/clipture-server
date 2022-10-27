@@ -1,0 +1,7 @@
+.gradientBtn {
+    background-image: linear-gradient(to right, var(--gradient-from) 0%, var(--gradient-to) 100%);
+}
+
+.gradientBtn:hover {
+    background-position: right center;
+}

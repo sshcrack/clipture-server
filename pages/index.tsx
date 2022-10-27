@@ -1,24 +1,31 @@
+import { Flex, Heading, Text } from '@chakra-ui/react'
+import Clipture from "../public/img/logo-var.svg"
 import type { NextPage } from 'next'
-import { useSession } from 'next-auth/react'
-import Link from 'next/link'
-import styles from '../styles/Home.module.css'
+import "../styles/Home.module.scss"
 
 const Home: NextPage = () => {
-  const { data } = useSession()
-  return (
-    <div className={styles.container} style={{ display: "flex", flexDirection: "column", justifyContent: "space-around", alignItems: "center", height: "100%"}}>
-      <Link href="/redirects/login"><a>
-        Login
-      </a>
-      </Link>
-
-      <Link href="/api/download"><a>
-        Download Clipture
-      </a>
-      </Link>
-      {data?.user?.name}
-    </div>
-  )
+  return <Flex
+    w='100%'
+    h='100%'
+    flexDir='column'
+  >
+    <Flex
+      w='100%'
+      h='100%'
+      justifyContent='center'
+      alignItems='center'
+    >
+      <Clipture style={{ width: '10%', height: "10%" }} />
+      <Flex
+        justifyContent='center'
+        alignItems='center'
+        flexDir='column'
+      >
+        <Heading>Clipture</Heading>
+        <Text>A clip platform reimagined.</Text>
+      </Flex>
+    </Flex>
+  </Flex>
 }
 
 export default Home

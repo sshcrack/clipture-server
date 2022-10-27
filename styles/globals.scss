@@ -1,0 +1,26 @@
+@font-face {
+  font-family: "Quattrocento";
+  src: url("/font/Quattrocento.ttf") format("opentype");
+}
+
+html,
+body {
+  padding: 0;
+  margin: 0;
+  height: 100%;
+  width: 100%;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+#__next {
+  width: 100%;
+  height: 100%
+}

@@ -154,6 +154,7 @@ export default async function Upload(req: NextApiRequest, res: NextApiResponse) 
             }) as PlainResponse
 
             console.log("Done.")
+            console.log("Fields are", fields)
             if (!response || response.statusCode !== 200) {
                 resolve()
                 if (response.statusCode === 500)
@@ -196,9 +197,12 @@ export default async function Upload(req: NextApiRequest, res: NextApiResponse) 
                     }
                 })
 
+
+                if (existsAlready)
+                    windowInfoId = existsAlready.id
                 const posted = await prisma.windowInformation.count({ where: { userId: user.id } })
 
-                const iconTooLarge = icon.length < 524300
+                const iconTooLarge = icon.length > 524300
                 if (iconTooLarge && !existsAlready && posted < submissionLimit) {
                     const iconBuffer = Buffer.from(icon, "hex")
                     const tempFile = path.join(os.tmpdir(), uuid() + ".ico")

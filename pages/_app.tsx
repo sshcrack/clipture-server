@@ -1,4 +1,4 @@
-import { ChakraProvider } from '@chakra-ui/react'
+import { ChakraProvider, DarkMode, GlobalStyle } from '@chakra-ui/react'
 import { SessionProvider } from 'next-auth/react'
 import type { AppProps } from 'next/app'
 import '../styles/globals.scss'
@@ -9,7 +9,10 @@ function MyApp({ Component, pageProps }: AppProps) {
     session={pageProps.session}
   >
     <ChakraProvider theme={theme}>
-      <Component {...pageProps} />
+      <DarkMode>
+        <GlobalStyle />
+        <Component {...pageProps} />
+      </DarkMode>
     </ChakraProvider>
   </SessionProvider>
 }

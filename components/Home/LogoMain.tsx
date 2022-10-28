@@ -1,7 +1,9 @@
 import { Flex, Text } from '@chakra-ui/react';
+import { motion } from 'framer-motion';
 import React from 'react';
 import ScaleText from "react-scale-text";
 import Clipture from "../../public/img/logo-var.svg";
+import DownloadButtons from './DownloadButtons';
 
 export default function LogoMain({ children }: React.PropsWithChildren<{}>) {
     return <>
@@ -34,6 +36,7 @@ export default function LogoMain({ children }: React.PropsWithChildren<{}>) {
                     <ScaleText><span>Clipture</span></ScaleText>
                 </Flex>
                 <Text flex='.25' fontSize='3em'>A clip platform reimagined.</Text>
+                <DownloadButtons />
                 {children}
             </Flex>
         </Flex>

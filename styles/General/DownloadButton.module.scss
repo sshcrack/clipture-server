@@ -1,0 +1,78 @@
+.buttonOuter {
+    margin-top: var(--chakra-space-10);
+    height: 5em;
+    width: 18em;
+    justify-content: center;
+    align-items: center;
+    background-color: var(--chakra-colors-gray-900);
+    border-radius: var(--chakra-radii-xl);
+    cursor: pointer;
+
+    .buttonText {
+        width: 100%;
+        text-align: center;
+        font-size: 1.5em;
+        padding: var(--chakra-space-3);
+    }
+
+    .buttonDownload {
+        flex: 0;
+
+        width: 100%;
+        height: 100%;
+
+        background-color: var(--chakra-colors-whiteAlpha-100);
+        padding: var(--chakra-space-5);
+
+        border-radius: var(--chakra-radii-xl);
+        border-top-left-radius: 0;
+        border-bottom-left-radius: 0;
+
+        transition: background-color .2s ease-in-out;
+    }
+
+    border: 0px solid transparent;
+    transition: all .2s ease-in-out;
+
+    position: relative;
+
+    &::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+
+        border-radius: var(--chakra-radii-xl);
+        border: 0px solid transparent;
+        background: linear-gradient(to right, var(--chakra-colors-brand-secondary), var(--chakra-colors-brand-primary)) border-box;
+        -webkit-mask:
+            /*4*/
+            linear-gradient(#fff 0 0) padding-box,
+            linear-gradient(#fff 0 0);
+        -webkit-mask-composite: xor;
+        mask-composite: exclude;
+        transition: border .2s ease-in-out;
+    }
+}
+
+.buttonOuter:hover {
+    .buttonDownload {
+        background-color: var(--chakra-colors-brandPrimary-900);
+        svg {
+            animation: downloadAnim .5s ease-in-out alternate infinite;
+        }
+    }
+
+    &::before {
+        border: 2px solid transparent;
+    }
+}
+
+@keyframes downloadAnim {
+    0% {
+        transform: translateY(0px)
+    }
+
+    100% {
+        transform: translateY(6px);
+    }
+}

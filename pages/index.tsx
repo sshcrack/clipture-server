@@ -3,6 +3,7 @@ import type { NextPage } from 'next'
 import Head from 'next/head'
 import Footer from '../components/Home/Footer'
 import LogoMain from '../components/Home/LogoMain'
+import Navbar from '../components/Navbar'
 import Sections from '../components/Sections'
 
 const Home: NextPage = () => {
@@ -21,6 +22,7 @@ const Home: NextPage = () => {
       <meta name="og:image" content="/img/cover/cover.png" />
       <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
     </Head>
+    <Navbar />
     <Flex
       flexDir='column'
       w='100%'

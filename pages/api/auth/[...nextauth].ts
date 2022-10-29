@@ -4,6 +4,7 @@ import { PrismaAdapter } from "@next-auth/prisma-adapter"
 import { PrismaClient } from "@prisma/client"
 
 const prisma = new PrismaClient()
+//TODO always check user image
 
 export const nextOptions: NextAuthOptions = {
     // Configure one or more authentication providers
@@ -16,9 +17,10 @@ export const nextOptions: NextAuthOptions = {
 
     adapter: PrismaAdapter(prisma),
     secret: process.env.NEXT_SECRET,
+    theme: { colorScheme: "dark" },
     session: {
         strategy: "database",
-        maxAge: 12 * 30 * 24 * 60 * 60 * 1000, // 12 Months
+        maxAge: 5 * 30 * 24 * 60 * 60, // 5 months
     },
     callbacks: {
         session: async ({ session, user }) => {

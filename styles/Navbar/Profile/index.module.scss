@@ -1,0 +1,8 @@
+.mainButton {
+    span {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: var(--chakra-space-2)
+    }
+}

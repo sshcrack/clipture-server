@@ -36,6 +36,16 @@ export const ErrorResponseList: APIErrorExtended[] = [
         error: GeneralError.ID_WRONG_TYPE,
         status: HttpStatusCode.BAD_REQUEST,
         message: "Id has to be of type string."
+    },
+    {
+        error: GeneralError.INVALID_USER,
+        status: HttpStatusCode.INTERNAL_SERVER_ERROR,
+        message: "Invalid user in db"
+    },
+    {
+        error: GeneralError.INVALID_REFRESH,
+        status: HttpStatusCode.INTERNAL_SERVER_ERROR,
+        message: "Could not refresh token"
     }
 ]
 

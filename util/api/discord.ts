@@ -2,6 +2,7 @@ import got from "got"
 import fetch from "node-fetch"
 
 export function getDiscordAvatar({ id, image }: { id: string, image: string | null }) {
+    console.log("id is", id, "image", image, "url", `https://cdn.discordapp.com/avatars/${id}/${image ?? "undefined"}.png`)
     return `https://cdn.discordapp.com/avatars/${id}/${image ?? "undefined"}.png`
 }
 

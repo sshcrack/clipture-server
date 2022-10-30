@@ -184,3 +184,7 @@ export async function runChecks<T>({ method, requiredFields, checks, ip, typeChe
 
     return valid
 }
+
+export function checkCUID(cuid: string) {
+    return /c([A-z]|\d)+$/.test(cuid)
+}

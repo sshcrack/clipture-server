@@ -1,19 +1,27 @@
-import { Heading } from '@chakra-ui/react';
+import { Flex, Heading, Text } from '@chakra-ui/react';
+import { User, WindowInformation } from '@prisma/client';
 import { NextParsedUrlQuery } from 'next/dist/server/request-meta';
 import Head from 'next/head';
-import { useRouter } from 'next/router';
+import Video from '../../components/General/Video';
+import DiscordGame from '../../components/General/Video/DiscordGame';
+import ClipUser from '../../components/General/Video/User';
+import WindowInfo from '../../components/General/Video/WindowInfo';
+import Navbar from '../../components/Navbar';
 import { prisma } from '../../util/db';
 
 type Props = {
     clip: {
         title: string,
-        id: string
+        id: string,
+        dcGameId: string,
+        windowInfo: WindowInformation,
+        uploader: User
     },
     url: string
 }
 
 export default function Page({ clip, url }: Props) {
-    const { title, id } = clip
+    const { title, id, dcGameId, uploader, windowInfo } = clip
 
     if (typeof id !== "string")
         return <Heading>Invalid Clip Id given</Heading>
@@ -27,9 +35,30 @@ export default function Page({ clip, url }: Props) {
             <meta property="og:video" content={`${url}/${clipUrl}`} />
             <meta property="og:video:type" content="video/mp4" />
             <meta name="og:title" content={`${title} - Clipture`} />
+            <title>{title} - Clipture</title>
         </Head>
-        <Heading>Work in progress.</Heading>
-        <video autoPlay src={`/${clipUrl}`} controls/>
+        {/*//TODO Change later */}
+        <Flex w='100%' h='100%' flexDir='column'>
+            <Navbar />
+            <Flex w='100%' h='calc(100% - 64px)' justifyContent='center' alignItems='center' flexDir='column' p='10'>
+                <Video src={`https://clipture.sshcrack.me/${clipUrl}`} title={title}>
+                    {dcGameId && <DiscordGame id={dcGameId} />}
+                    {windowInfo && <WindowInfo info={windowInfo} />}
+                    <Flex
+                        flex='1'
+                        justifyContent='center'
+                        alignItems='center'
+                    >
+                        <Text
+                            fontSize='xl'
+                            boxShadow='0 0 10px 6px black'
+                            bg='black'
+                        >{title}</Text>
+                    </Flex>
+                    <ClipUser user={uploader}/>
+                </Video>
+            </Flex>
+        </Flex>
     </>
 }
 
@@ -40,14 +69,14 @@ export async function getServerSideProps({ params }: { params: NextParsedUrlQuer
             notFound: true,
         }
 
-    const clip = await prisma.clip.findFirst({ where: { id } })
+    const clip = await prisma.clip.findFirst({ where: { id }, include: { windowInfo: true, uploader: true } })
     if (!clip)
         return {
             notFound: true
         }
 
-    const { title } = clip
+    const { title, dcGameId, windowInfo, uploader } = clip
 
     // Pass data to the page via props
-    return { props: { clip: { title, id }, url: process.env.NEXTAUTH_URL } }
+    return { props: { clip: { title, id, dcGameId, windowInfo, uploader }, url: process.env.NEXTAUTH_URL } }
 }

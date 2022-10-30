@@ -30,3 +30,7 @@ a {
   justify-content: center;
   align-items: center;
 }
+
+.invisible-children > * {
+  display: none !important;
+}

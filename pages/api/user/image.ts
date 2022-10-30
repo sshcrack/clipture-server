@@ -1,26 +1,40 @@
 import got from 'got/dist/source';
 import { NextApiRequest, NextApiResponse } from 'next';
-import { DiscordUserResponse, getDiscordAvatar, getUserImage, refreshToken, RefreshTokenResponse, requestDiscordUser } from '../../../util/api/discord';
+import { DiscordUserResponse, getUserImage, refreshToken, RefreshTokenResponse, requestDiscordUser } from '../../../util/api/discord';
 import getServerUser from '../../../util/auth';
 import { prisma } from '../../../util/db';
 import { GeneralError } from '../../../util/interfaces/error-codes';
 import { sendErrorResponse } from '../../../util/responses';
+import { checkCUID } from '../../../util/validators';
 
+const cache = new Map<string, string>()
+const CACHE_EXPIRE = 1000 * 60 * 60
+
+const addCacheExpire = (id: string) => setTimeout(() => cache.delete(id), CACHE_EXPIRE)
 export default async function UserImageAPI(req: NextApiRequest, res: NextApiResponse) {
-    const user = await getServerUser(req)
-    if (!user)
+    const auth = await getServerUser(req)
+    if (!auth)
         return sendErrorResponse(res, GeneralError.UNAUTHENTICATED)
 
-    let avatarUrl = getDiscordAvatar(user)
-    const dcRes = await got(getDiscordAvatar(user), { method: "HEAD", throwHttpErrors: false })
-    if (dcRes.statusCode === 200)
-        return res.redirect(avatarUrl)
+    const userId = req.query.id ?? auth.id
 
+    if (typeof userId !== "string" || userId.length > 30 || !checkCUID(userId))
+        return sendErrorResponse(res, GeneralError.ID_WRONG_TYPE)
 
-    const dbAcc = await prisma.account.findFirst({ where: { userId: user.id } })
+    if (cache.has(userId))
+        return res.redirect(cache.get(userId) as string)
+
+    const dbAcc = await prisma.account.findFirst({ where: { userId: userId }, include: { user: true } })
     if (!dbAcc)
         return sendErrorResponse(res, GeneralError.USER_NOT_FOUND)
 
+    let avatarUrl = dbAcc.user.image as string
+    const dcRes = await got(avatarUrl, { method: "HEAD", throwHttpErrors: false })
+    if (dcRes.statusCode === 200) {
+        cache.set(userId, avatarUrl)
+        addCacheExpire(userId)
+        return res.redirect(avatarUrl)
+    }
 
     let { access_token, token_type, id: dbAccId, refresh_token, userId: dbUserId } = dbAcc
     if (!token_type || !access_token)
@@ -76,5 +90,8 @@ export default async function UserImageAPI(req: NextApiRequest, res: NextApiResp
         }
     })
 
+    cache.set(userId, avatarUrl)
+    addCacheExpire(userId)
+    console.log("Setting", userId, "to", avatarUrl)
     return res.redirect(newImg)
 }

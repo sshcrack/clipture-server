@@ -10,6 +10,7 @@ export default async function IconClips(req: NextApiRequest, res: NextApiRespons
 
     const pngOut = path.join(process.cwd(), "icons", id)
     const exists = await existsProm(pngOut)
+    res.setHeader("Content-Type", "image/png")
     if (!exists) {
         const unknown = path.join("public", "unknown.png")
 

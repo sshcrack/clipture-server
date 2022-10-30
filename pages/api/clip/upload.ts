@@ -206,7 +206,8 @@ export default async function Upload(req: NextApiRequest, res: NextApiResponse) 
                 if (iconTooLarge && !existsAlready && posted < submissionLimit) {
                     const iconBuffer = Buffer.from(icon, "hex")
                     const tempFile = path.join(os.tmpdir(), uuid() + ".ico")
-                    const pngOut = path.join(process.cwd(), "icons", uuid() + ".png")
+                    const icoId =  uuid()
+                    const pngOut = path.join(process.cwd(), "icons", icoId + ".png")
 
                     await writeFile(tempFile, iconBuffer)
                     console.log("Converting", tempFile, "to", pngOut)
@@ -233,7 +234,7 @@ export default async function Upload(req: NextApiRequest, res: NextApiResponse) 
                             data: {
                                 className: classNameShortened,
                                 executable: executableShortened,
-                                icon: pngOut,
+                                icon: icoId,
                                 title: windowTitleShortened,
                                 userId: user.id
                             }

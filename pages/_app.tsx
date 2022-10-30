@@ -73,7 +73,8 @@ const styles = {
 const theme = extendTheme({ config, component, colors, fonts, styles })
 
 function MyApp({ Component, pageProps }: AppProps) {
-  useEffect(() => localStorage.setItem("chakra-ui-color-mode", "dark"), [])
+  if(typeof window !== "undefined")
+    localStorage.setItem("chakra-ui-color-mode", "dark")
 
   return <SessionProvider
     session={pageProps.session}

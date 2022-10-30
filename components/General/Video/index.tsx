@@ -214,7 +214,7 @@ export default function Video({ children, ...props }: MediaHTMLAttributes<HTMLVi
     >
         <video {...props}
             ref={vidRef}
-            style={{ width: width, height: height }}
+            style={{ width: width, height: height, zIndex: -1 }}
         />
         {loading ? <Spinner /> : controls}
     </Grid>

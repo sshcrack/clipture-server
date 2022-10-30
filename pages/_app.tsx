@@ -4,6 +4,7 @@ import type { AppProps } from 'next/app'
 import '../styles/globals.scss'
 
 import { extendTheme, ThemeConfig } from '@chakra-ui/react';
+import { useEffect } from 'react';
 
 const config: ThemeConfig = {
   initialColorMode: 'dark',
@@ -72,14 +73,14 @@ const styles = {
 const theme = extendTheme({ config, component, colors, fonts, styles })
 
 function MyApp({ Component, pageProps }: AppProps) {
+  useEffect(() => localStorage.setItem("chakra-ui-color-mode", "dark"), [])
+
   return <SessionProvider
     session={pageProps.session}
   >
     <ChakraProvider theme={theme}>
-      <DarkMode>
-        <GlobalStyle />
-        <Component {...pageProps} />
-      </DarkMode>
+      <GlobalStyle />
+      <Component {...pageProps} />
     </ChakraProvider>
   </SessionProvider>
 }

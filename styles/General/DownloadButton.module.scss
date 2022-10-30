@@ -87,7 +87,6 @@
         border: 2px solid transparent;
         background: linear-gradient(to right, var(--chakra-colors-brand-secondary), var(--chakra-colors-brand-primary)) border-box;
         -webkit-mask:
-            /*4*/
             linear-gradient(#fff 0 0) padding-box,
             linear-gradient(#fff 0 0);
         -webkit-mask-composite: xor;

@@ -214,6 +214,7 @@ export default function Video({ children, ...props }: MediaHTMLAttributes<HTMLVi
     >
         <video {...props}
             ref={vidRef}
+            autoPlay
             style={{ width: width, height: height, zIndex: -1 }}
         />
         {loading ? <Spinner /> : controls}

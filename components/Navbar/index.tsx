@@ -1,10 +1,19 @@
-import { Flex, Heading, Spinner, Text } from '@chakra-ui/react';
+import { Flex, Spinner, Text } from '@chakra-ui/react';
 import { useSession } from 'next-auth/react';
+import dynamic from 'next/dynamic';
 import Headroom from "react-headroom";
 import Clipture from "../../public/img/logo.svg";
 import { getPageURL } from '../../util/url';
 import LoginButton from './LoginButton';
-import Profile from './Profile';
+
+
+
+const ProfileLazy = dynamic(
+    () => import("./Profile"),
+    {
+        loading: () => <Spinner />
+    }
+)
 
 export default function Navbar() {
     const { status } = useSession()
@@ -35,7 +44,7 @@ export default function Navbar() {
             {status === "loading" ?
                 <Spinner /> : (
                     status === "authenticated" ?
-                        <Profile flex='0' /> :
+                        <ProfileLazy flex='0' /> :
                         <LoginButton flex='0' />
                 )
             }

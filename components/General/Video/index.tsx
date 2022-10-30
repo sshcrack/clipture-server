@@ -5,11 +5,17 @@ import { HiSpeakerXMark, HiSpeakerWave } from "react-icons/hi2"
 import { MediaHTMLAttributes, useEffect, useRef, useState } from 'react';
 import styles from "../../../styles/General/Video/index.module.scss"
 import { scaleKeepRatioSpecific } from '../../../util/math';
+import { ReactSetState } from '../../../util/validators/interface';
 
 const getElWidth = (elm: HTMLElement) => Math.max(elm.scrollWidth, elm.offsetWidth, elm.clientWidth)
 const getElHeight = (elm: HTMLElement) => Math.max(elm.scrollHeight, elm.offsetHeight, elm.clientHeight)
 
-export default function Video({ children, ...props }: MediaHTMLAttributes<HTMLVideoElement>) {
+export type Props = {
+    setHeight?: ReactSetState<string>,
+    setWidth?: ReactSetState<string>
+}
+
+export default function Video({ children, setWidth: sW, setHeight: sH, ...props }: MediaHTMLAttributes<HTMLVideoElement> & Props) {
     const vidRef = useRef<HTMLVideoElement>(null)
     const gridRef = useRef<HTMLDivElement>(null)
     const [loading, setLoading] = useState(true)
@@ -21,6 +27,16 @@ export default function Video({ children, ...props }: MediaHTMLAttributes<HTMLVi
 
     const [hovered, setHovered] = useState(false)
     const [timeoutId, setTimeoutId] = useState<NodeJS.Timeout | null>(null)
+
+    useEffect(() => {
+        const listener = ({ key }: KeyboardEvent) => {
+            if (key === "f")
+                document.fullscreenElement ? document.exitFullscreen() : vidRef.current?.requestFullscreen()
+        }
+
+        window.addEventListener("keypress", listener)
+        return () => window.removeEventListener("keypress", listener)
+    }, [vidRef])
 
     useEffect(() => {
         if (!gridRef.current || !vidRef.current)
@@ -52,9 +68,14 @@ export default function Video({ children, ...props }: MediaHTMLAttributes<HTMLVi
                     const newWidth = getElWidth(curr)
 
                     const [width, height] = scaleKeepRatioSpecific(vidWidth, vidHeight, { width: newWidth, height: newHeight }, true)
+                    const wPx = width + "px"
+                    const hPx = height + "px"
 
-                    setWidth(width + "px")
-                    setHeight(height + "px")
+                    setWidth(wPx)
+                    setHeight(hPx)
+
+                    sW && sW(wPx)
+                    sH && sH(hPx)
                     locked = false
                     curr.classList.remove("invisible-children")
                 })
@@ -65,7 +86,7 @@ export default function Video({ children, ...props }: MediaHTMLAttributes<HTMLVi
 
         window.addEventListener("resize", handle)
         return () => window.removeEventListener("resize", handle)
-    }, [gridRef, vidRef, loading, fetched])
+    }, [gridRef, vidRef, loading, fetched, sH, sW])
 
     useEffect(() => {
         const curr = vidRef.current
@@ -175,13 +196,21 @@ export default function Video({ children, ...props }: MediaHTMLAttributes<HTMLVi
                     alignItems='center'
                     gap='5'
                 >
-                    {vid.muted ?
-                        <HiSpeakerXMark style={{ height: "2em", width: "2em" }}/> :
-                        <HiSpeakerWave  style={{ height: "2em", width: "2em" }}/>
-                    }
+                    <Flex
+                        cursor='pointer'
+                        onClick={() => {
+                            vid.muted = !vid.muted
+                            setUpdate(Math.random())
+                        }}
+                    >
+                        {vid.muted ?
+                            <HiSpeakerXMark style={{ height: "2em", width: "1.25rem" }} /> :
+                            <HiSpeakerWave style={{ height: "2em", width: "1.25rem" }} />
+                        }
+                    </Flex>
                     <Slider
                         max={1}
-                        value={isNaN(vid.volume) ? 0 : vid.volume}
+                        value={isNaN(vid.volume) ? 0 : (vid.muted ? 0 : vid.volume)}
                         onChange={e => {
                             vid.volume = e
                             vid.muted = e === 0

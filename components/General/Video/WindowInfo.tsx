@@ -1,7 +1,12 @@
 import { Flex, Text } from '@chakra-ui/react';
 import { WindowInformation } from '@prisma/client';
+type Props = {
+    info: WindowInformation,
+    imgSize?: string,
+    fontSize?: string
+}
 
-export default function WindowInfo({ info }: { info: WindowInformation }) {
+export default function WindowInfo({ info, fontSize, imgSize }: Props) {
     const { title, icon } = info
 
     return <Flex
@@ -16,11 +21,11 @@ export default function WindowInfo({ info }: { info: WindowInformation }) {
             src={`/api/clip/icon/${icon}`}
             alt='Game Image'
             style={{
-                width: "1.5rem",
-                height: "1.5rem",
+                width: imgSize ?? "1.5rem",
+                height: imgSize ?? "1.5rem",
                 borderRadius: "var(--chakra-radii-md)"
             }}
         />
-        <Text>{title}</Text>
+        <Text fontSize={fontSize}>{title}</Text>
     </Flex>
 }

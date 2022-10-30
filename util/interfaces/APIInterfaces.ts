@@ -61,5 +61,11 @@ export type FilteredClip = {
     title: string;
     dcGameId: string | null;
     hex: string;
-    windowInfo: WindowInformation | null;
-}[]
+    windowInfo: {
+        id: string;
+        userId: string;
+        title: string;
+        icon: string;
+    } | null;
+    likes: number
+}

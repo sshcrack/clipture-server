@@ -6,6 +6,7 @@ import { RateLimit } from '../../../util/rate-limit';
 import { ConsumeType } from '../../../util/rate-limit/interface';
 import { sendErrorResponse } from '../../../util/responses';
 import { GeneralError } from '../../../util/interfaces/error-codes';
+import { FilteredClip } from '../../../util/interfaces/APIInterfaces';
 
 export default async function ListClips(req: NextApiRequest, res: NextApiResponse) {
     const user = await getServerUser(req)
@@ -23,15 +24,23 @@ export default async function ListClips(req: NextApiRequest, res: NextApiRespons
         where: {
             uploaderId: user.id
         },
-        include: { windowInfo: true }
+        include: {
+            windowInfo: true,
+            _count: {
+                select: {
+                    likes: true
+                }
+            }
+        }
     })
 
-    const filteredInfo = clips.map(({ id, uploadDate, title, dcGameId, windowInfo, hex }) => ({
+    const filteredInfo: FilteredClip[] = clips.map(({ id, uploadDate, title, dcGameId, windowInfo, hex, _count }) => ({
         id,
         uploadDate,
         title,
         dcGameId,
         hex,
+        likes: _count.likes,
         windowInfo: windowInfo ? {
             id: windowInfo.id,
             userId: windowInfo.userId,

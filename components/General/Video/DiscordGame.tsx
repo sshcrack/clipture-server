@@ -3,7 +3,8 @@ import Image from 'next/image';
 import { useEffect, useState } from 'react';
 import { DetectableGame } from '../../../util/detection';
 
-export default function DiscordGame({ id }: { id: string }) {
+export type Props = { id: string, imgSize?: string, fontSize?: string }
+export default function DiscordGame({ id, fontSize, imgSize }: Props) {
     const [games, setGames] = useState<DetectableGame[] | null>(null)
     const toast = useToast()
 
@@ -43,11 +44,11 @@ export default function DiscordGame({ id }: { id: string }) {
             src={`/api/game/image?id=${gameId}&icon=${icon}`}
             alt='Game Image'
             style={{
-                width: "1.5rem",
-                height: "1.5rem",
+                width: imgSize ?? "1.5rem",
+                height: imgSize ?? "1.5rem",
                 borderRadius: "var(--chakra-radii-md)"
             }}
         />
-        <Text>{name}</Text>
+        <Text fontSize={fontSize}>{name}</Text>
     </Flex>
 }

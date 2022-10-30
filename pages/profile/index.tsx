@@ -7,7 +7,7 @@ import { getPageURL } from '../../util/url'
 
 export default function Profile() {
     const { status, data } = useSession()
-    const [list, setList] = useState<FilteredClip | null>(null)
+    const [list, setList] = useState<FilteredClip[] | null>(null)
 
 
     useEffect(() => {

@@ -4,22 +4,22 @@ datasource db {
 }
 
 generator client {
-  provider        = "prisma-client-js"
+  provider = "prisma-client-js"
 }
 
 model Account {
-  id                 String  @id @default(cuid())
-  userId             String
-  type               String
-  provider           String
-  providerAccountId  String
-  refresh_token      String?  @db.Text
-  access_token       String?  @db.Text
-  expires_at         Int?
-  token_type         String?
-  scope              String?
-  id_token           String?  @db.Text
-  session_state      String?
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -45,7 +45,8 @@ model User {
   clips         Clip[]
 
   // Weither this user is banned, only set to true manually yet.
-  banned        Boolean @default(false)
+  banned Boolean @default(false)
+  likes  Like[]
 }
 
 model VerificationToken {
@@ -57,52 +58,66 @@ model VerificationToken {
 }
 
 model DiscordGame {
-  id        String @id @default(cuid())
+  id String @id @default(cuid())
 }
 
 model WindowInformation {
-  id          String  @id @default(cuid())
+  id String @id @default(cuid())
 
   // User id by which this info has been reported
-  userId      String
-  clips       Clip[]
+  userId String
+  clips  Clip[]
 
-  title       String
+  title String
 
   // Information of this application to add it to clipture later
 
-  className   String
-  executable  String
+  className  String
+  executable String
 
   // Icon path
-  icon        String
+  icon String
 
-  @@unique([ className, executable ])
+  @@unique([className, executable])
 }
 
 model Clip {
-  id            String  @id
+  id String @id
 
   // The title of this clip
-  title         String
+  title String
 
-  uploader      User @relation(fields: [uploaderId], references: [id])
-  uploaderId    String // relation scalar field  (used in the `@relation` attribute above)
+  uploader   User   @relation(fields: [uploaderId], references: [id])
+  uploaderId String // relation scalar field  (used in the `@relation` attribute above)
 
   // Game information
 
-  dcGameId      String?
-  windowInfo    WindowInformation? @relation(fields: [windowInfoId], references: [id])
-  windowInfoId  String?
+  dcGameId     String?
+  windowInfo   WindowInformation? @relation(fields: [windowInfoId], references: [id])
+  windowInfoId String?
 
   // Size of this clip
-  size          Int
+  size Int
 
   // Date when this clip got updated
-  uploadDate    DateTime
+  uploadDate DateTime
 
   // Storage location of this clip
-  storage       String
+  storage String
 
-  hex           String
+  hex String
+
+  likes Like[]
+}
+
+model Like {
+  id String @id @default(cuid())
+
+  user   User   @relation(fields: [userId], references: [id])
+  userId String
+
+  clip   Clip   @relation(fields: [clipId], references: [id])
+  clipId String
+
+  @@unique([userId, clipId])
 }

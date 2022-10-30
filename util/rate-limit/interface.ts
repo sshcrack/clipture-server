@@ -6,7 +6,9 @@ export enum ConsumeType {
     Rename,
     Upload,
     Usage,
-    Report
+    Report,
+    Like,
+    LikeHas
 }
 
 export interface CostInterface<T> {

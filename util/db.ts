@@ -27,3 +27,11 @@ export async function checkBanned(userId: string, res: NextApiResponse) {
 
     return false
 }
+
+const cleanups = new Map<string, NodeJS.Timeout>()
+export function addCleanup(id: string, callback: () => unknown, delay: number) {
+    if (cleanups.has(id))
+        clearTimeout(cleanups.get(id) as NodeJS.Timeout)
+
+    cleanups.set(id, setTimeout(() => callback(), delay))
+}

@@ -2,11 +2,7 @@ import { NextApiRequest, NextApiResponse } from "next";
 import path from "path"
 import fs from "fs"
 import { existsProm } from '../../../../util/fs';
-
-export function validateId(id: string) {
-    const regex = /^[0-9A-Za-z]{8}-[0-9A-Za-z]{4}-4[0-9A-Za-z]{3}-[89ABab][0-9A-Za-z]{3}-[0-9A-Za-z]{12}$/g
-    return regex.test(id)
-}
+import { validateId } from '../../../../util/validators';
 
 export default async function IconClips(req: NextApiRequest, res: NextApiResponse) {
     const { id } = req.query

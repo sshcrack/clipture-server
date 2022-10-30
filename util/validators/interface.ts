@@ -18,3 +18,4 @@ export type TypeCheckInterface = {
 export type TypeOfResults = "string" | "number" | "bigint" | "boolean" | "symbol" | "undefined" | "object" | "function"
 export type IFunctionArgs<T extends number> = FixedLengthArray<CheckArgumentType[], T>
 export type IFunctions<T extends number> = FixedLengthArray<Function, T>
+export type ReactSetState<T> = React.Dispatch<React.SetStateAction<T>>

@@ -2,11 +2,12 @@
 import { Avatar, Button, Flex, FlexProps, Menu, MenuButton, MenuItem, MenuList, Text } from '@chakra-ui/react';
 import { useSession } from 'next-auth/react';
 import { AiOutlineDown } from 'react-icons/ai';
+import styles from "../../../styles/Navbar/Profile/index.module.scss";
 import { getPageURL } from '../../../util/url';
-import styles from "../../../styles/Navbar/Profile/index.module.scss"
 
 export default function Profile(props: FlexProps) {
     const { data } = useSession()
+
     if (!data || !data.user)
         return <Text>Not authenticated.</Text>
 

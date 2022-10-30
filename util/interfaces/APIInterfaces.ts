@@ -1,3 +1,4 @@
+import { WindowInformation } from '@prisma/client'
 import { Merge } from "type-fest"
 import ErrorCodes, { FormattedError } from "./error-codes"
 
@@ -53,3 +54,12 @@ export enum FieldLength {
     PASSWORD = 128,
     OTP = 6
 }
+
+export type FilteredClip = {
+    id: string;
+    uploadDate: Date;
+    title: string;
+    dcGameId: string | null;
+    hex: string;
+    windowInfo: WindowInformation | null;
+}[]

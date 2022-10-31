@@ -50,7 +50,7 @@ export default function Navbar() {
                     alignItems='center'
                     gap='2'
                     cursor='pointer'
-                    onClick={() => window.open("https://discord.gg/WHYhUF4")}
+                    onClick={() => window.open("https://discord.gg/9uPuP2eAF4")}
                 >
                     <FaDiscord style={{ color: "#5865F2", width: "2rem", height: "2rem" }} />
                     <Link fontSize='xl'>Discord</Link>

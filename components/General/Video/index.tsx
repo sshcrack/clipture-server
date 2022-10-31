@@ -45,6 +45,7 @@ export default function Video({ children, setWidth: sW, setHeight: sH, ...props 
         const curr = gridRef.current
         const currVid = vidRef.current
 
+
         let t = null as NodeJS.Timeout | null
         let locked = false
         const handle = () => {
@@ -84,8 +85,17 @@ export default function Video({ children, setWidth: sW, setHeight: sH, ...props 
 
         handle()
 
+        const observer = new ResizeObserver(() =>{
+            handle()
+            console.log("Resize observer")
+        })
+        observer.observe(curr)
+
         window.addEventListener("resize", handle)
-        return () => window.removeEventListener("resize", handle)
+        return () => {
+            window.removeEventListener("resize", handle)
+            observer.disconnect()
+        }
     }, [gridRef, vidRef, loading, fetched, sH, sW])
 
     useEffect(() => {

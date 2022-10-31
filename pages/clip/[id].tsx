@@ -1,4 +1,4 @@
-import { Button, Flex, Heading, Text } from '@chakra-ui/react';
+import { Button, Flex, Heading, Link, Text } from '@chakra-ui/react';
 import { User, WindowInformation } from '@prisma/client';
 import { NextParsedUrlQuery } from 'next/dist/server/request-meta';
 import Head from 'next/head';
@@ -63,7 +63,7 @@ export default function Page({ clip, url }: Props) {
                         >{title}</Text>
                     </Flex>
                 </Video>
-                <Flex w={width}>
+                <Flex style={{ width: width }}>
                     {dcGameId && <DiscordGame imgSize='2.5rem' fontSize='xl' id={dcGameId} />}
                     {windowInfo && <WindowInfo imgSize='2.5rem' fontSize='xl' info={windowInfo} />}
                     <Flex
@@ -75,6 +75,7 @@ export default function Page({ clip, url }: Props) {
                     </Flex>
                     <ClipUser user={uploader} />
                 </Flex>
+                <Link href='mailto:getclipture@gmail.com'>Report</Link>
             </Flex>
         </Flex>
     </>

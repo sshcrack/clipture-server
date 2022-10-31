@@ -1,6 +1,7 @@
 import { Button, Flex, Grid, Spinner, Text } from '@chakra-ui/react';
 import { useEffect, useState } from 'react';
 import { FaHeart, FaHeartBroken } from 'react-icons/fa';
+import { getPageURL } from '../../../util/url';
 import { ReactSetState } from '../../../util/validators/interface';
 
 export default function LikeButton({ id, setCount: sC }: { id: string, setCount?: ReactSetState<number> }) {
@@ -15,7 +16,7 @@ export default function LikeButton({ id, setCount: sC }: { id: string, setCount?
         fetch(`/api/user/like/${id}/has`)
             .then(e => e.json())
             .then(e => {
-                setLiked(e.liked)
+                setLiked(e.liked ?? null)
                 setCount(e.count)
                 sC && sC(e.count)
             })
@@ -34,7 +35,7 @@ export default function LikeButton({ id, setCount: sC }: { id: string, setCount?
     return <Flex justifyContent='center' alignItems='center' gap='3'>
         {
             typeof liked !== "undefined" ?
-                <Grid>
+                (<Grid>
                     <Button
                         gridRow='1'
                         gridColumn='1'
@@ -49,13 +50,13 @@ export default function LikeButton({ id, setCount: sC }: { id: string, setCount?
                         _hover={{ background: hoverBg }}
                         isLoading={requesting}
                         loadingText='Liking...'
-                        onClick={() => like(!liked)}
+                        onClick={() => liked === null ? location.href = getPageURL("/redirects/login", "") : like(!liked)}
                         leftIcon={liked ?
                             <FaHeartBroken /> :
                             <FaHeart />
                         }
                     >{liked ? "Unlike" : "Like"}</Button>
-                </Grid>
+                </Grid>)
 
                 : <Spinner />
         }

@@ -19,11 +19,12 @@ export default async function LikeRoute(req: NextApiRequest, res: NextApiRespons
     if (typeof mode !== "string" || (mode !== "remove" && mode !== "add" && mode !== "has"))
         return res.status(HttpStatusCode.BAD_REQUEST).json({ error: "Invalid mode has to be add, remove or has" })
 
+
     const user = await getServerUser(req)
-    if (!user)
+    if (!user && mode !== "has")
         return sendErrorResponse(res, GeneralError.UNAUTHENTICATED)
 
-    if (await checkBanned(user.id, res))
+    if (user && await checkBanned(user.id, res))
         return
 
     if (mode === "has") {
@@ -32,7 +33,7 @@ export default async function LikeRoute(req: NextApiRequest, res: NextApiRespons
             return
     }
 
-    let liked = cache.get(id)?.includes(user.id)
+    let liked = user && cache.get(id)?.includes(user.id)
     let likedCount = cache.get(id)?.length
 
     if (!liked) {
@@ -44,15 +45,18 @@ export default async function LikeRoute(req: NextApiRequest, res: NextApiRespons
         if (!dbClip)
             return res.status(HttpStatusCode.NOT_FOUND).json({ error: "Could not find clip" })
 
-        liked = dbClip.likes.some(e => e.userId === user.id)
+        liked = user && dbClip.likes.some(e => e.userId === user.id)
         likedCount = dbClip.likes.length
         cache.set(id, dbClip.likes.map(e => e.id))
         setTimeout(() => cache.delete(id), CACHE_EXPIRE)
     }
 
     if (mode === "has")
-        return res.json({ liked: liked, count: likedCount })
+        return user ? res.json({ liked: liked, count: likedCount }) : res.json({ count: likedCount })
 
+    // should never happen, just for typing reasons
+    if (!user)
+        return sendErrorResponse(res, GeneralError.UNAUTHENTICATED)
 
     const isRateLimited = await RateLimit.consume(ConsumeType.Like, req, res)
     if (isRateLimited)

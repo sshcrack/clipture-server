@@ -1,7 +1,8 @@
-import { Flex, Spinner, Text } from '@chakra-ui/react';
+import { Flex, Link, Spinner, Text } from '@chakra-ui/react';
 import { useSession } from 'next-auth/react';
 import dynamic from 'next/dynamic';
 import Headroom from "react-headroom";
+import { FaDiscord } from 'react-icons/fa';
 import Clipture from "../../public/img/logo.svg";
 import { getPageURL } from '../../util/url';
 import LoginButton from './LoginButton';
@@ -27,9 +28,7 @@ export default function Navbar() {
             justifyContent='center'
             alignItems='center'
         >
-            <Flex
-                w='100%'
-            >
+            <Flex>
                 <Flex
                     gap='1'
                     alignItems='center'
@@ -40,6 +39,22 @@ export default function Navbar() {
                     <Text fontSize='xl'>Clipture</Text>
                 </Flex>
 
+            </Flex>
+            <Flex
+                w='100%'
+                justifyContent='center'
+                alignItems='center'
+            >
+                <Flex
+                    justifyContent='center'
+                    alignItems='center'
+                    gap='2'
+                    cursor='pointer'
+                    onClick={() => window.open("https://discord.gg/WHYhUF4")}
+                >
+                    <FaDiscord style={{ color: "#5865F2", width: "2rem", height: "2rem" }} />
+                    <Link fontSize='xl'>Discord</Link>
+                </Flex>
             </Flex>
             {status === "loading" ?
                 <Spinner /> : (

@@ -36,7 +36,9 @@ export default function Profile(props: FlexProps) {
                 <MenuItem
                     pb='1'
                     roundedBottom='md'
-                    bgColor='red.500'
+                    bgColor='red.800'
+                    _hover={{ background: "red.600"}}
+                    _focus={{ background: "red.600"}}
                     onClick={() => location.href = getPageURL("/redirects/logout", "?redirectHome=true")}
                 >Sign Out</MenuItem>
             </MenuList>

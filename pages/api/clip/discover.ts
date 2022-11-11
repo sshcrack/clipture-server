@@ -10,12 +10,12 @@ const MAX_LIMIT = 50
 export default async function DiscoverClips(req: NextApiRequest, res: NextApiResponse) {
     const { offset: offsetStr, limit: limitStr } = req.query
 
-    if (offsetStr && (typeof offsetStr !== "string" || !isNaN(offsetStr as unknown as number)))
+    if (offsetStr && (typeof offsetStr !== "string" || isNaN(offsetStr as unknown as number)))
         return res.status(HttpStatusCode.BAD_REQUEST).json({
             error: "Offset has to be string or not set"
         })
 
-    if (limitStr && (typeof limitStr !== "string" || !isNaN(limitStr as unknown as number)))
+    if (limitStr && (typeof limitStr !== "string" || isNaN(limitStr as unknown as number)))
         return res.status(HttpStatusCode.BAD_REQUEST).json({
             error: `Limit string has to be an integer between 1 and ${MAX_LIMIT}`
         })

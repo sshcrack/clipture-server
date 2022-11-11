@@ -60,6 +60,7 @@ export type FilteredClip = {
     uploadDate: Date;
     title: string;
     dcGameId: string | null;
+    uploaderId: string;
     hex: string;
     windowInfo: {
         id: string;
@@ -69,3 +70,5 @@ export type FilteredClip = {
     } | null;
     likes: number
 }
+
+export type DiscoverClip = Omit<FilteredClip, "hex">

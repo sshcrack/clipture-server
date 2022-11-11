@@ -3,6 +3,7 @@ import { RateLimiterMemory } from "rate-limiter-flexible";
 export enum ConsumeType {
     Delete,
     List,
+    Discover,
     Rename,
     Upload,
     Usage,

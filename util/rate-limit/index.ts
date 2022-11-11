@@ -49,6 +49,10 @@ export class RateLimit {
         {
             type: ConsumeType.Discover,
             retries: 30
+        },
+        {
+            type: ConsumeType.Visibility,
+            retries: 25
         }
     ].map(e => {
         const obj: CostInterface<ConsumeType> = {

@@ -2,6 +2,7 @@ import { NextApiRequest, NextApiResponse } from "next";
 import path from "path";
 import { prisma } from "../../../util/db";
 import { DiscoverClip } from '../../../util/interfaces/APIInterfaces';
+import HttpStatusCode from '../../../util/interfaces/status-codes';
 import { RateLimit } from '../../../util/rate-limit';
 import { ConsumeType } from '../../../util/rate-limit/interface';
 const MAX_LIMIT = 50
@@ -10,24 +11,24 @@ export default async function DiscoverClips(req: NextApiRequest, res: NextApiRes
     const { offset: offsetStr, limit: limitStr } = req.query
 
     if (offsetStr && (typeof offsetStr !== "string" || !isNaN(offsetStr as unknown as number)))
-        return res.json({
+        return res.status(HttpStatusCode.BAD_REQUEST).json({
             error: "Offset has to be string or not set"
         })
 
     if (limitStr && (typeof limitStr !== "string" || !isNaN(limitStr as unknown as number)))
-        return res.json({
+        return res.status(HttpStatusCode.BAD_REQUEST).json({
             error: `Limit string has to be an integer between 1 and ${MAX_LIMIT}`
         })
 
     const offset = parseInt(offsetStr ?? "0")
     const limit = parseInt(limitStr ?? "20")
     if (offset< 0)
-        return res.json({
+        return res.status(HttpStatusCode.BAD_REQUEST).json({
             error: "Offset has to be above 0"
         })
 
     if (limit < 1 || limit > MAX_LIMIT)
-        return res.json({
+        return res.status(HttpStatusCode.BAD_REQUEST).json({
             error: `Limit has to be between 1 and ${MAX_LIMIT}`
         })
 

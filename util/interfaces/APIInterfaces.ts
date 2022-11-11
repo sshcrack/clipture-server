@@ -62,6 +62,7 @@ export type FilteredClip = {
     dcGameId: string | null;
     uploaderId: string;
     hex: string;
+    isPublic: boolean;
     windowInfo: {
         id: string;
         userId: string;
@@ -71,4 +72,4 @@ export type FilteredClip = {
     likes: number
 }
 
-export type DiscoverClip = Omit<FilteredClip, "hex">
+export type DiscoverClip = Omit<FilteredClip, "hex" | "isPublic">

@@ -22,7 +22,7 @@ export default async function DiscoverClips(req: NextApiRequest, res: NextApiRes
 
     const offset = parseInt(offsetStr ?? "0")
     const limit = parseInt(limitStr ?? "20")
-    if (offset< 0)
+    if (offset < 0)
         return res.status(HttpStatusCode.BAD_REQUEST).json({
             error: "Offset has to be above 0"
         })
@@ -41,6 +41,9 @@ export default async function DiscoverClips(req: NextApiRequest, res: NextApiRes
         skip: offset,
         take: limit,
         orderBy: { uploadDate: "desc" },
+        where: {
+            isPublic: true
+        },
         select: {
             id: true,
             uploadDate: true,

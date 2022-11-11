@@ -108,6 +108,7 @@ model Clip {
   hex String
 
   likes Like[]
+  isPublic Boolean @default(false)
 }
 
 model Like {

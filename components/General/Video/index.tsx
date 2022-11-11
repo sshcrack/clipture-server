@@ -39,7 +39,7 @@ export default function Video({ children, setWidth: sW, setHeight: sH, ...props 
     }, [vidRef])
 
     useEffect(() => {
-        if (!gridRef.current || !vidRef.current)
+        if (!gridRef?.current || !vidRef?.current)
             return
 
         const curr = gridRef.current
@@ -85,7 +85,7 @@ export default function Video({ children, setWidth: sW, setHeight: sH, ...props 
 
         handle()
 
-        const observer = new ResizeObserver(() =>{
+        const observer = new ResizeObserver(() => {
             handle()
             console.log("Resize observer")
         })
@@ -99,7 +99,7 @@ export default function Video({ children, setWidth: sW, setHeight: sH, ...props 
     }, [gridRef, vidRef, loading, fetched, sH, sW])
 
     useEffect(() => {
-        const curr = vidRef.current
+        const curr = vidRef?.current
         if (!curr)
             return
 
@@ -124,7 +124,7 @@ export default function Video({ children, setWidth: sW, setHeight: sH, ...props 
         }
     }, [vidRef])
 
-    const vid = vidRef.current
+    const vid = vidRef?.current
     let controls = <></>;
     const transition = 'all .2s ease-in-out'
     if (vid) {

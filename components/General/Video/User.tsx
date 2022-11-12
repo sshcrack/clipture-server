@@ -1,7 +1,11 @@
 import { Avatar, Flex, FlexProps, Text } from '@chakra-ui/react';
-import { User } from '@prisma/client';
 
-export default function ClipUser({ user, ...props }: { user: User } & Omit<FlexProps, "children">) {
+export type SmallUser = {
+    name: string | null,
+    id: string | null
+}
+
+export default function ClipUser({ user, ...props }: { user: SmallUser } & Omit<FlexProps, "children">) {
     const { id, name } = user
     return <Flex
         gap='5'

@@ -26,7 +26,6 @@ type Props = {
 export default function Page({ clip, url }: Props) {
     const { title, id, dcGameId, uploader, windowInfo } = clip
     const [width, setWidth] = useState("100%")
-    const [likes, seTLikes] = useState(0)
 
     if (typeof id !== "string")
         return <Heading>Invalid Clip Id given</Heading>
@@ -88,7 +87,16 @@ export async function getServerSideProps({ params }: { params: NextParsedUrlQuer
             notFound: true,
         }
 
-    const clip = await prisma.clip.findFirst({ where: { id }, include: { windowInfo: true, uploader: true } })
+    const clip = await prisma.clip.findFirst({
+        where: { id }, include: {
+            windowInfo: true, uploader: {
+                select: {
+                    image: true,
+                    name: true
+                }
+            }
+        }
+    })
     if (!clip)
         return {
             notFound: true

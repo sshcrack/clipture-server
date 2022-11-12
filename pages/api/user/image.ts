@@ -13,10 +13,7 @@ const CACHE_EXPIRE = 1000 * 60 * 60
 const addCacheExpire = (id: string) => setTimeout(() => cache.delete(id), CACHE_EXPIRE)
 export default async function UserImageAPI(req: NextApiRequest, res: NextApiResponse) {
     const auth = await getServerUser(req)
-    if (!auth)
-        return sendErrorResponse(res, GeneralError.UNAUTHENTICATED)
-
-    const userId = req.query.id ?? auth.id
+    const userId = req.query.id ?? auth?.id
 
     if (typeof userId !== "string" || userId.length > 30 || !checkCUID(userId))
         return sendErrorResponse(res, GeneralError.ID_WRONG_TYPE)

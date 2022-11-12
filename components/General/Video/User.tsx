@@ -1,6 +1,6 @@
 import { Avatar, Flex, FlexProps, Text } from '@chakra-ui/react';
 
-export type SmallUser = {
+type SmallUser = {
     name: string | null,
     id: string | null
 }

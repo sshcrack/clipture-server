@@ -1,9 +1,8 @@
-import { Button, Flex, Heading, Link, Text } from '@chakra-ui/react';
-import { User, WindowInformation } from '@prisma/client';
+import { Flex, Heading, Link, Text } from '@chakra-ui/react';
+import { WindowInformation } from '@prisma/client';
 import { NextParsedUrlQuery } from 'next/dist/server/request-meta';
 import Head from 'next/head';
-import { useEffect, useState } from 'react';
-import { FaHeart, FaHeartBroken } from "react-icons/fa"
+import { useState } from 'react';
 import Video from '../../components/General/Video';
 import DiscordGame from '../../components/General/Video/DiscordGame';
 import LikeButton from '../../components/General/Video/LikeButton';
@@ -12,13 +11,19 @@ import WindowInfo from '../../components/General/Video/WindowInfo';
 import Navbar from '../../components/Navbar';
 import { prisma } from '../../util/db';
 
+
+export type SmallUser = {
+    name: string | null,
+    id: string | null
+}
+
 type Props = {
     clip: {
         title: string,
         id: string,
         dcGameId: string,
         windowInfo: WindowInformation,
-        uploader: User
+        uploader: SmallUser
     },
     url: string
 }

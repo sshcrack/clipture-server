@@ -97,7 +97,8 @@ export async function getServerSideProps({ params }: { params: NextParsedUrlQuer
             windowInfo: true, uploader: {
                 select: {
                     image: true,
-                    name: true
+                    name: true,
+                    id: true
                 }
             }
         }

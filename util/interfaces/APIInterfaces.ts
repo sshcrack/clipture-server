@@ -69,7 +69,6 @@ export type FilteredClip = {
         title: string;
         icon: string;
     } | null;
-    likes: number
 }
 
 export type DiscoverClip = Omit<FilteredClip, "hex" | "isPublic">

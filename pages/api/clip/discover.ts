@@ -50,23 +50,17 @@ export default async function DiscoverClips(req: NextApiRequest, res: NextApiRes
             title: true,
             dcGameId: true,
             uploaderId: true,
-            windowInfo: true,
-            _count: {
-                select: {
-                    likes: true
-                }
-            }
+            windowInfo: true
         }
     })
     const total = await prisma.clip.count({ where: { isPublic: true } })
 
-    const filteredInfo: DiscoverClip[] = clips.map(({ id, uploadDate, title, dcGameId, windowInfo, uploaderId, _count }) => ({
+    const filteredInfo: DiscoverClip[] = clips.map(({ id, uploadDate, title, dcGameId, windowInfo, uploaderId}) => ({
         id,
         uploadDate,
         title,
         dcGameId,
         uploaderId,
-        likes: _count.likes,
         windowInfo: windowInfo ? {
             id: windowInfo.id,
             userId: windowInfo.userId,

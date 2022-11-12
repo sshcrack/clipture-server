@@ -15,10 +15,11 @@ export default async function UserGetRoute(req: NextApiRequest, res: NextApiResp
     if (isRateLimited)
         return
 
-    const user = prisma.user.findFirst({
+    const user = await prisma.user.findFirst({
         select: {
             name: true,
-            image: true
+            image: true,
+            id: true
         },
         where: {
             id: id

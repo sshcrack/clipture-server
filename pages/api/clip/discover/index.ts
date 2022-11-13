@@ -49,7 +49,8 @@ export default async function DiscoverClips(req: NextApiRequest, res: NextApiRes
         where: {
             isPublic: true,
             title: query ? {
-                contains: query
+                contains: query,
+                mode: "insensitive"
             } : undefined
         },
         select: {

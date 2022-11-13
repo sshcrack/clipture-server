@@ -1,10 +1,10 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import path from "path";
-import { prisma } from "../../../util/db";
-import { DiscoverClip } from '../../../util/interfaces/APIInterfaces';
-import HttpStatusCode from '../../../util/interfaces/status-codes';
-import { RateLimit } from '../../../util/rate-limit';
-import { ConsumeType } from '../../../util/rate-limit/interface';
+import { prisma } from "../../../../util/db";
+import { DiscoverClip } from '../../../../util/interfaces/APIInterfaces';
+import HttpStatusCode from '../../../../util/interfaces/status-codes';
+import { RateLimit } from '../../../../util/rate-limit';
+import { ConsumeType } from '../../../../util/rate-limit/interface';
 const MAX_LIMIT = 50
 
 export default async function DiscoverClips(req: NextApiRequest, res: NextApiResponse) {
@@ -55,7 +55,7 @@ export default async function DiscoverClips(req: NextApiRequest, res: NextApiRes
     })
     const total = await prisma.clip.count({ where: { isPublic: true } })
 
-    const filteredInfo: DiscoverClip[] = clips.map(({ id, uploadDate, title, dcGameId, windowInfo, uploaderId}) => ({
+    const filteredInfo: DiscoverClip[] = clips.map(({ id, uploadDate, title, dcGameId, windowInfo, uploaderId }) => ({
         id,
         uploadDate,
         title,

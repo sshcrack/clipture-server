@@ -26,6 +26,6 @@ export default function WindowInfo({ info, fontSize, imgSize }: Props) {
                 borderRadius: "var(--chakra-radii-md)"
             }}
         />
-        <Text fontSize={fontSize}>{title}</Text>
+        <Text fontSize={fontSize} whiteSpace='nowrap'>{title}</Text>
     </Flex>
 }

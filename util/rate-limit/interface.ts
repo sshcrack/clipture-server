@@ -4,6 +4,7 @@ export enum ConsumeType {
     Delete,
     List,
     Discover,
+    DiscoverFilters,
     Rename,
     Upload,
     Usage,

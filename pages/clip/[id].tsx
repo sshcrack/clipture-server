@@ -68,6 +68,14 @@ export default function Page({ clip, url }: Props) {
                     </Flex>
                 </Video>
                 <Flex style={{ width: width }}>
+                    {(!dcGameId && !windowInfo) && <WindowInfo imgSize='2.5rem' fontSize='xl' info={{
+                        className: null as unknown as string,
+                        executable: null as unknown as string,
+                        icon: "unknown",
+                        id: null as unknown as string,
+                        title: "Unknown Game",
+                        userId: null as unknown as string
+                    }}/>}
                     {dcGameId && <DiscordGame imgSize='2.5rem' fontSize='xl' id={dcGameId} />}
                     {windowInfo && <WindowInfo imgSize='2.5rem' fontSize='xl' info={windowInfo} />}
                     <Flex

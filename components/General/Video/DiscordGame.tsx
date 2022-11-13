@@ -49,6 +49,6 @@ export default function DiscordGame({ id, fontSize, imgSize }: Props) {
                 borderRadius: "var(--chakra-radii-md)"
             }}
         />
-        <Text fontSize={fontSize}>{name}</Text>
+        <Text fontSize={fontSize} whiteSpace='nowrap'>{name}</Text>
     </Flex>
 }

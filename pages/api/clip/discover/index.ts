@@ -29,7 +29,7 @@ export default async function DiscoverClips(req: NextApiRequest, res: NextApiRes
     const limit = parseInt(limitStr ?? "20")
     if (offset < 0)
         return res.status(HttpStatusCode.BAD_REQUEST).json({
-            error: "Offset has to be above 0"
+            error: "Offset has to be above or 0"
         })
 
     if (limit < 1 || limit > MAX_LIMIT)

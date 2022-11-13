@@ -5,6 +5,7 @@ export enum ConsumeType {
     List,
     Discover,
     DiscoverFilters,
+    DiscoverSearch,
     Rename,
     Upload,
     Usage,

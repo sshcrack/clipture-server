@@ -8,7 +8,12 @@ import { ConsumeType } from '../../../../util/rate-limit/interface';
 const MAX_LIMIT = 50
 
 export default async function DiscoverClips(req: NextApiRequest, res: NextApiResponse) {
-    const { offset: offsetStr, limit: limitStr } = req.query
+    const { offset: offsetStr, limit: limitStr, query } = req.query
+
+    if (query && (typeof query !== "string" || query.length > 50))
+        return res.status(HttpStatusCode.BAD_REQUEST).json({
+            error: "Search query has to be below 50 characters"
+        })
 
     if (offsetStr && (typeof offsetStr !== "string" || isNaN(offsetStr as unknown as number)))
         return res.status(HttpStatusCode.BAD_REQUEST).json({
@@ -42,7 +47,10 @@ export default async function DiscoverClips(req: NextApiRequest, res: NextApiRes
         take: limit,
         orderBy: { uploadDate: "desc" },
         where: {
-            isPublic: true
+            isPublic: true,
+            title: query ? {
+                contains: query
+            } : undefined
         },
         select: {
             id: true,

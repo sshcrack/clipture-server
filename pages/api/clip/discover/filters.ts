@@ -1,36 +1,42 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import path from "path";
 import { prisma } from "../../../../util/db";
-import { DiscoverClip } from '../../../../util/interfaces/APIInterfaces';
-import HttpStatusCode from '../../../../util/interfaces/status-codes';
 import { RateLimit } from '../../../../util/rate-limit';
 import { ConsumeType } from '../../../../util/rate-limit/interface';
-const MAX_LIMIT = 50
+
+const CACHE_EXPIRE = 1000 * 60 * 5
+let cache: DiscoverFilter[] | null = null
+
+export type FilteredWindowInformation = {
+    id: string;
+    userId: string;
+    title: string;
+    icon: string;
+}
+
+export type DiscoverFilter = {
+    windowInfo: FilteredWindowInformation | null,
+    dcGameId: string | null
+}
 
 export default async function DiscoverFilterClips(req: NextApiRequest, res: NextApiResponse) {
     const isRateLimited = await RateLimit.consume(ConsumeType.DiscoverFilters, req, res)
     if (isRateLimited)
         return
 
-    const clips = await prisma.clip.groupBy({
-        where: { isPublic: true },
-        orderBy: {
-            dcGameId: "asc",
-            windowInfoId: "asc"
-        },
-        by: ["dcGameId", "windowInfoId"]
-    })
-    const windowInfos = await prisma.windowInformation.findMany({
-        where: {
-            OR: clips
-                .filter(e => e.windowInfoId)
-                .map(e => ({ id: e.windowInfoId as string }))
+    if (cache)
+        return res.json(cache)
+
+    const clips = await prisma.clip.findMany({
+        distinct: ["dcGameId", "windowInfoId"],
+        select: {
+            windowInfo: true,
+            windowInfoId: true,
+            dcGameId: true
         }
     })
 
-    const filteredInfo = clips.map(({ dcGameId, windowInfoId }) => {
-        const windowInfo = windowInfos.find(e => e.id === windowInfoId)
-
+    const filteredInfo: DiscoverFilter[] = clips.map(({ dcGameId, windowInfo }) => {
         return {
             dcGameId,
             windowInfo: windowInfo ? {
@@ -40,7 +46,12 @@ export default async function DiscoverFilterClips(req: NextApiRequest, res: Next
                 icon: path.basename(windowInfo.icon),
             } : null
         }
-    })
+    }).filter(e => e.dcGameId || e.windowInfo)
 
+    cache = filteredInfo
+
+    setTimeout(() => {
+        cache = null
+    }, CACHE_EXPIRE)
     res.json(filteredInfo)
 }

@@ -1,5 +1,12 @@
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
+public/assets
+
+**/migrations/
+migration_lock.toml
+icons
+
+**/*.db
 # dependencies
 /node_modules
 /.pnp
@@ -33,3 +40,9 @@ yarn-error.log*
 
 # typescript
 *.tsbuildinfo
+
+public/*.exe
+public/*.exe.hash
+public/*.zip
+public/*.zip.hash
+assets.zip

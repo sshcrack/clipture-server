@@ -1,9 +1,12 @@
 import { parseCookies, setCookie } from "nookies"
 import { signIn, useSession } from "next-auth/react"
 import { useEffect } from 'react'
+import { useRouter } from 'next/router'
+import { getPageURL } from '../../util/url'
 
 function LoginPage() {
     const { status } = useSession()
+
     useEffect(() => {
         console.log(status)
 
@@ -12,6 +15,7 @@ function LoginPage() {
         }) as unknown as { [key: string]: string };
 
         if (status === "unauthenticated") {
+            localStorage.setItem("redirectHome", params?.redirectHome)
             const id = params?.id
             if (id)
                 setCookie(null, 'id', id, {
@@ -43,6 +47,10 @@ function LoginPage() {
             }
 
             asyncRun()
+            if (params?.redirectHome ?? localStorage.getItem("redirectHome")) {
+                localStorage.removeItem("redirectHome")
+                location.href = getPageURL("/", "")
+            }
         }
     }, [status])
 

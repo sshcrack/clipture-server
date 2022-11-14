@@ -1,13 +1,8 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import rateLimit from '../../../util/rate-limit';
+import { RateLimit } from '../../../util/rate-limit';
+import { ConsumeType } from '../../../util/rate-limit/interface';
 export const clientSessions: { [key: string]: ClientSessionInterface[] } = {}
 
-const limiter = rateLimit({
-    interval: 60 * 1000, // 60 seconds
-    uniqueTokenPerInterval: 500, // Max 500 users per second
-})
-
-const persistance = 1000 * 60 * 5 // 10 Min
 export default async function ReportAPIRoute(req: NextApiRequest, res: NextApiResponse) {
     if (req.method === "POST") {
         const body = req.body as RequestBody
@@ -20,18 +15,9 @@ export default async function ReportAPIRoute(req: NextApiRequest, res: NextApiRe
             return res.status(400)
                 .send({ error: "ID has to be a string and 72 characters long." })
 
-        const limited = await limiter.check(res, 10, req.socket.remoteAddress + "-report")
-            .catch(() => true)
-            .then(() => false)
-
-        if (limited)
-            return res.status(429).json({ error: "Rate limit exceeded" })
-
-
-        if (!clientSessions?.[id])
-            setTimeout(() => {
-                delete clientSessions?.[id]
-            }, persistance)
+        const isRateLimited = await RateLimit.consume(ConsumeType.Report, req, res)
+        if (isRateLimited)
+            return
 
         const matchingEntries = Object.entries(req.cookies)
             .filter(([key]) => typeof key === "string" && (key.includes("next-auth.session") || key.includes("next-auth.csrf")));
@@ -56,7 +42,7 @@ export default async function ReportAPIRoute(req: NextApiRequest, res: NextApiRe
                 type: "session",
             }
         ]
-        console.log("New ID added", id)
+
         return res.send({
             successful: true
         })

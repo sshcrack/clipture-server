@@ -15,6 +15,9 @@
     "jsx": "preserve",
     "incremental": true
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx"],
-  "exclude": ["node_modules"]
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", "components/General/Video/index.tsx.old"],
+  "exclude": ["node_modules"],
+  "typeRoots": [
+    "./types",
+  ]
 }

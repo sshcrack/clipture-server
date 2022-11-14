@@ -1,0 +1,124 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String?   @unique
+  emailVerified DateTime?
+  image         String?
+  accounts      Account[]
+  sessions      Session[]
+  clips         Clip[]
+
+  // Weither this user is banned, only set to true manually yet.
+  banned Boolean @default(false)
+  likes  Like[]
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+model DiscordGame {
+  id String @id @default(cuid())
+}
+
+model WindowInformation {
+  id String @id @default(cuid())
+
+  // User id by which this info has been reported
+  userId String
+  clips  Clip[]
+
+  title String
+
+  // Information of this application to add it to clipture later
+
+  className  String
+  executable String
+
+  // Icon path
+  icon String
+
+  @@unique([className, executable])
+}
+
+model Clip {
+  id String @id
+
+  // The title of this clip
+  title String
+
+  uploader   User   @relation(fields: [uploaderId], references: [id])
+  uploaderId String // relation scalar field  (used in the `@relation` attribute above)
+
+  // Game information
+
+  dcGameId     String?
+  windowInfo   WindowInformation? @relation(fields: [windowInfoId], references: [id])
+  windowInfoId String?
+
+  // Size of this clip
+  size Int
+
+  // Date when this clip got updated
+  uploadDate DateTime
+
+  // Storage location of this clip
+  storage String
+
+  hex String
+
+  likes Like[]
+  isPublic Boolean @default(false)
+}
+
+model Like {
+  id String @id @default(cuid())
+
+  user   User   @relation(fields: [userId], references: [id])
+  userId String
+
+  clip   Clip   @relation(fields: [clipId], references: [id])
+  clipId String
+
+  @@unique([userId, clipId])
+}

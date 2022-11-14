@@ -1,24 +1,40 @@
+import { Box, Flex } from '@chakra-ui/react'
 import type { NextPage } from 'next'
-import { useSession } from 'next-auth/react'
-import Link from 'next/link'
-import styles from '../styles/Home.module.css'
+import Head from 'next/head'
+import Footer from '../components/Home/Footer'
+import LogoMain from '../components/Home/LogoMain'
+import Navbar from '../components/Navbar'
+import Sections from '../components/Sections'
 
 const Home: NextPage = () => {
-  const { data } = useSession()
-  return (
-    <div className={styles.container} style={{ display: "flex", flexDirection: "column", justifyContent: "space-around", alignItems: "center", height: "100%"}}>
-      <Link href="/redirects/login"><a>
-        Login
-      </a>
-      </Link>
-
-      <Link href="/api/download"><a>
-        Download Clipture
-      </a>
-      </Link>
-      {data?.user?.name}
-    </div>
-  )
+  return <Box
+    w='100%'
+    h='100%'
+  >
+    <Head>
+      <title>Clipture</title>
+      <meta name="keywords" content="Clipture, Clip, Platform, Cloud, Cut, Electron, Typescript, Game" />
+      <meta name="description" content="Record your favorite games!" />
+      <meta name="author" content="sshcrack" />
+      <meta name="og:type" content="website" />
+      <meta name="og:url" content="https://clipture.sshcrack.me" />
+      <meta name="og:site_name" content="Clipture" />
+      <meta name="og:image" content="/img/cover/cover.png" />
+      <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
+    </Head>
+    <Navbar />
+    <Flex
+      flexDir='column'
+      w='100%'
+      h='100vh'
+      justifyContent='center'
+      alignItems='center'
+    >
+      <LogoMain />
+    </Flex>
+    <Sections />
+    <Footer />
+  </Box>
 }
 
 export default Home

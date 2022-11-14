@@ -1,0 +1,89 @@
+import { Flex, Heading, Text, useMediaQuery } from '@chakra-ui/react';
+import { User, WindowInformation } from '@prisma/client';
+import { NextParsedUrlQuery } from 'next/dist/server/request-meta';
+import Head from 'next/head';
+import Video from '../../components/General/Video';
+import DiscordGame from '../../components/General/Video/DiscordGame';
+import ClipUser from '../../components/General/Video/User';
+import WindowInfo from '../../components/General/Video/WindowInfo';
+import Navbar from '../../components/Navbar';
+import { prisma } from '../../util/db';
+import styles from "../../styles/Clip/index.module.scss"
+
+type Props = {
+    clip: {
+        title: string,
+        id: string,
+        dcGameId: string,
+        windowInfo: WindowInformation,
+        uploader: User
+    },
+    url: string
+}
+
+export default function Page({ clip, url }: Props) {
+    const { title, id, dcGameId, uploader, windowInfo } = clip
+    const [isPhone] = useMediaQuery("(max-width: 632px)")
+
+    if (typeof id !== "string")
+        return <Heading>Invalid Clip Id given</Heading>
+
+
+    const clipUrl = `api/clip/get/${id}`
+    const game = <>
+        {dcGameId && <DiscordGame id={dcGameId} />}
+        {windowInfo && <WindowInfo info={windowInfo} />}
+    </>
+
+    return <>
+        <Head>
+            <meta property='og:type' content='video.other' />
+            <meta property="og:url" content={`${url}/clip/${id}`} />
+            <meta name="theme-color" content="#b721ff" />
+            <meta property="og:video" content={`${url}/${clipUrl}`} />
+            <meta property="og:video:type" content="video/mp4" />
+            <meta name="og:title" content={`${title} - Clipture`} />
+            <title>{title} - Clipture</title>
+        </Head>
+        {/*//TODO Change later */}
+            <Navbar />
+            {isPhone && <ClipUser user={uploader} />}
+            <Flex className={styles.videoWrapper}>
+                <Video src={`https://clipture.sshcrack.me/${clipUrl}`} title={title}>
+                    {!isPhone && game}
+                    <Flex
+                        flex='1'
+                        justifyContent='center'
+                        alignItems='center'
+                    >
+                        <Text
+                            fontSize='xl'
+                            boxShadow='0 0 10px 6px black'
+                            bg='black'
+                        >{title}</Text>
+                    </Flex>
+                    {!isPhone && <ClipUser user={uploader} />}
+                </Video>
+                {isPhone && game}
+            </Flex>
+    </>
+}
+
+export async function getServerSideProps({ params }: { params: NextParsedUrlQuery }) {
+    const { id } = params
+    if (typeof id !== "string")
+        return {
+            notFound: true,
+        }
+
+    const clip = await prisma.clip.findFirst({ where: { id }, include: { windowInfo: true, uploader: true } })
+    if (!clip)
+        return {
+            notFound: true
+        }
+
+    const { title, dcGameId, windowInfo, uploader } = clip
+
+    // Pass data to the page via props
+    return { props: { clip: { title, id, dcGameId, windowInfo, uploader }, url: process.env.NEXTAUTH_URL } }
+}

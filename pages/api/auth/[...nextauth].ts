@@ -1,40 +1,33 @@
 import NextAuth, { NextAuthOptions } from 'next-auth';
 import DiscordProvider from "next-auth/providers/discord";
-import { ConnectionOptions } from 'typeorm';
-import { TypeORMLegacyAdapter } from "@next-auth/typeorm-legacy-adapter"
+import { PrismaAdapter } from "@next-auth/prisma-adapter"
+import { PrismaClient } from "@prisma/client"
 
+const prisma = new PrismaClient()
+//TODO always check user image
 
-const port = parseInt(process.env.TYPEORM_PORT as string);
-const host = process.env.TYPEORM_HOST;
-const username = process.env.TYPEORM_USERNAME;
-const password = process.env.TYPEORM_PASSWORD;
-const database = process.env.TYPEORM_DATABASE;
-
-let dbOptions: ConnectionOptions = {
-    type: "postgres",
-    port: port,
-    host: host,
-    username: username,
-    password: password,
-    database: database,
-    synchronize: true
-}
-
-const options: NextAuthOptions = {
+export const nextOptions: NextAuthOptions = {
     // Configure one or more authentication providers
     providers: [
         DiscordProvider({
-            clientId: process.env.CLIENT_ID,
-            clientSecret: process.env.CLIENT_SECRET
+            clientId: process.env.CLIENT_ID as string,
+            clientSecret: process.env.CLIENT_SECRET as string
         })
     ],
 
-    adapter: TypeORMLegacyAdapter(dbOptions),
+    adapter: PrismaAdapter(prisma),
     secret: process.env.NEXT_SECRET,
+    theme: { colorScheme: "dark" },
     session: {
         strategy: "database",
-        maxAge: 12 * 30 * 24 * 60 * 60 * 1000, // 12 Months
+        maxAge: 5 * 30 * 24 * 60 * 60, // 5 months
     },
+    callbacks: {
+        session: async ({ session, user }) => {
+            session.userId = user.id;
+            return session
+        }
+    }
 }
 
-export default NextAuth(options)
+export default NextAuth(nextOptions)

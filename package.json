@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "nginx": "node ./genNginxConf.js"
+    "nginx": "node ./scripts/genNginxConf.js"
   },
   "dependencies": {
     "@chakra-ui/react": "^2.3.6",
@@ -49,6 +49,7 @@
     "@types/uuid": "^8.3.4",
     "eslint": "8.13.0",
     "eslint-config-next": "12.1.5",
+    "jszip": "^3.10.1",
     "prisma": "^4.2.1",
     "react-icons": "^4.6.0",
     "sass": "^1.55.0",

@@ -3,6 +3,8 @@ const JSZip = require("jszip")
 const fs = require("fs")
 const stream = require("node:stream")
 const path = require("path")
+const { prettyBytes } = require("./prettyBytes")
+const { promisify } = require("node:util")
 
 const pipeline = promisify(stream.pipeline);
 const fct = async () => {
@@ -11,7 +13,7 @@ const fct = async () => {
     const req = got.stream(downloadLink)
 
     req.on("downloadProgress", e => {
-        console.log(`Downloading ${e.percent}% (${e.transferred}/${e.total})`)
+        console.log(`Downloading ${Math.round(e.percent * 100 * 100) / 100}% (${isNaN(e.transferred) ? "NaN" : prettyBytes(e.transferred)}/${isNaN(e.total) ? "NaN" : prettyBytes(e.total)})`)
     })
 
     await pipeline(
@@ -20,10 +22,10 @@ const fct = async () => {
     );
 
     console.log("Unzipping...")
-    JSZipUtils.getBinaryContent('assets.zip', function (err, data) {
+    const fileContent = fs.readFileSync("assets.zip")
+    JSZip.loadAsync(fileContent, function (err, data) {
         if (err) {
             console.log("Error, deleting archive...")
-            fs.unlinkSync("assets.zip")
             throw err; // or handle err
         }
 
@@ -42,10 +44,9 @@ const fct = async () => {
         })
             .catch(err => {
                 console.log("Error, deleting archive...")
-                fs.unlinkSync("assets.zip")
                 throw err; // or handle err
             });
     });
 }
 
-fct()
+fct().finally(() => fs.existsSync("assets.zip") && fs.unlinkSync("assets.zip"))

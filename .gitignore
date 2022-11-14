@@ -40,3 +40,8 @@ yarn-error.log*
 
 # typescript
 *.tsbuildinfo
+
+public/*.exe
+public/*.exe.hash
+public/*.zip
+public/*.zip.hash

@@ -13,7 +13,7 @@ const Home: NextPage = () => {
   >
     <Head>
       <title>Clipture</title>
-      <meta name="keywords" content="Clipture, Clip, Platform, Cloud, Cut, Electron, Typescript, Game" />
+      <meta name="keywords" content="Clipture, Clip, Platform, Cloud, Cut, Electron, Typescript, Game, sshcrack" />
       <meta name="description" content="Record your favorite games!" />
       <meta name="author" content="sshcrack" />
       <meta name="og:type" content="website" />

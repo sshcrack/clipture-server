@@ -10,7 +10,7 @@ export default function Footer() {
             alignItems='center'
         >
             <Text mr='3'>Made by</Text>
-            <Image width={32} height={32} src='/img/sshcrack.png' alt='sshcrack icon' />
+            <Image width={32} height={32} src='/api/user/image?id=cl92zsdb60010opm8uvqe0nrw' alt='sshcrack icon' />
             <Text ml='1'>sshcrack</Text>
         </Flex>
     </a>

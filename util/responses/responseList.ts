@@ -46,7 +46,12 @@ export const ErrorResponseList: APIErrorExtended[] = [
         error: GeneralError.INVALID_REFRESH,
         status: HttpStatusCode.INTERNAL_SERVER_ERROR,
         message: "Could not refresh token"
-    }
+    },
+    {
+        error: GeneralError.ONLY_POST,
+        status: HttpStatusCode.METHOD_NOT_ALLOWED,
+        message: "This route only allows POST as method."
+    },
 ]
 
 interface APIErrorExtended {

@@ -16,7 +16,8 @@ export enum GeneralError {
     BANNED,
     ID_WRONG_TYPE,
     INVALID_USER,
-    INVALID_REFRESH
+    INVALID_REFRESH,
+    ONLY_POST
 }
 
 type ErrorCodes = FormattedError | GeneralError

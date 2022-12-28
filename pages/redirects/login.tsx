@@ -46,11 +46,11 @@ function LoginPage() {
                 window.close()
             }
 
-            asyncRun()
             if (params?.redirectHome ?? localStorage.getItem("redirectHome")) {
                 localStorage.removeItem("redirectHome")
                 location.href = getPageURL("/", "")
-            }
+            } else
+                asyncRun()
         }
     }, [status])
 

@@ -43,6 +43,7 @@ model User {
   accounts      Account[]
   sessions      Session[]
   clips         Clip[]
+  reports       DebugReport[]
 
   // Weither this user is banned, only set to true manually yet.
   banned Boolean @default(false)
@@ -121,4 +122,15 @@ model Like {
   clipId String
 
   @@unique([userId, clipId])
+}
+
+
+model DebugReport {
+  id String @id @default(cuid())
+
+  message String
+  archive String
+
+  reporter   User   @relation(fields: [reporterId], references: [id])
+  reporterId String // relation scalar field  (used in the `@relation` attribute above)
 }

@@ -13,7 +13,8 @@ export enum ConsumeType {
     Like,
     LikeHas,
     Visibility,
-    UserGet
+    UserGet,
+    DebugReport
 }
 
 export interface CostInterface<T> {

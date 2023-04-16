@@ -26,10 +26,10 @@ export function refreshToken(refresh_token: string) {
     formData.append("scope", "identify email")
 
     console.log("FormData is", formData)
+    //old https://discord.com/api/oauth2/token
     return fetch(`https://discord.com/api/oauth2/token`, {
         method: "POST",
         headers: {
-            Authorization: `Basic ${CLIENT_ID}:${CLIENT_SECRET}`,
             "Content-Type": "application/x-www-form-urlencoded"
         },
         body: formData

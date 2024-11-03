@@ -1,4 +1,4 @@
-import got from 'got/dist/source';
+import got from 'got';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { DiscordUserResponse, getUserImage, refreshToken, RefreshTokenResponse, requestDiscordUser } from '../../../util/api/discord';
 import getServerUser from '../../../util/auth';

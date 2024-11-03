@@ -1,4 +1,3 @@
-const got = require("got")
 const JSZip = require("jszip")
 const fs = require("fs")
 const stream = require("node:stream")
@@ -10,6 +9,7 @@ const currHash = "58b0f7a94ee51e587cd5ae82be15c456796c67d6469c7872f165e69976141a
 
 const pipeline = promisify(stream.pipeline);
 const fct = async () => {
+    const got = (await import("got")).default
     const dotFile = ".downloaded-assets-hash"
     if (fs.existsSync(dotFile)) {
         const hash = fs.readFileSync(dotFile, "utf-8")

@@ -6,7 +6,6 @@ import styles from "../../styles/General/DownloadButton.module.scss"
 export default function DownloadButtons() {
     return <>
         <Link href='/api/download'>
-            <a>
                 <Flex className={styles.glowBox}>
                     <Flex
                         className={styles.buttonOuter}
@@ -26,12 +25,9 @@ export default function DownloadButtons() {
                         </Flex>
                     </Flex>
                 </Flex>
-            </a>
         </Link>
-        <Link href='https://github.com/sshcrack/clipture/releases/latest'>
-            <a style={{paddingTop: "var(--chakra-space-8)"}}>
+        <Link href='https://github.com/sshcrack/clipture/releases/latest' style={{paddingTop: "var(--chakra-space-8)"}}>
                 <Text>More download options</Text>
-            </a>
         </Link>
     </>
 }

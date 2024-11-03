@@ -1,9 +1,11 @@
 /* eslint-disable @next/next/no-img-element */
-import { Avatar, Button, Flex, FlexProps, Menu, MenuButton, MenuItem, MenuList, Text } from '@chakra-ui/react';
 import { useSession } from 'next-auth/react';
 import { AiOutlineDown } from 'react-icons/ai';
 import styles from "../../../styles/Navbar/Profile/index.module.scss";
 import { getPageURL } from '../../../util/url';
+import { MenuItem, MenuRoot, MenuTrigger, MenuContent, MenuItemText } from '../../ui/menu';
+import { Button, Flex, FlexProps, Text } from '@chakra-ui/react';
+import { Avatar } from '../../ui/avatar';
 
 export default function Profile(props: FlexProps) {
     const { data } = useSession()
@@ -18,30 +20,28 @@ export default function Profile(props: FlexProps) {
         alignItems='center'
         {...props}
     >
-        <Menu>
-            <MenuButton
-                as={Button}
-                p='7 !important'
-                mt='2'
-                rightIcon={<AiOutlineDown />}
-                className={styles.mainButton}
-            >
-                <Avatar src={"/api/user/image"} name={name ?? undefined} />
-                <Text>{name}</Text>
-            </MenuButton>
-            <MenuList pb='0'>
-                <MenuItem
-                    onClick={() => location.href = getPageURL("/profile", "")}
-                >Profile</MenuItem>
-                <MenuItem
-                    pb='1'
-                    roundedBottom='md'
-                    bgColor='red.800'
-                    _hover={{ background: "red.600"}}
-                    _focus={{ background: "red.600"}}
-                    onClick={() => location.href = getPageURL("/redirects/logout", "?redirectHome=true")}
-                >Sign Out</MenuItem>
-            </MenuList>
-        </Menu>
+        <MenuRoot onSelect={({ value }) => {
+            if (value === "view-profile")
+                location.href = getPageURL("/profile", "")
+            if (value === "sign-out")
+                location.href = getPageURL("/redirects/logout", "?redirectHome=true")
+        }}>
+            <MenuTrigger asChild>
+                <Button
+                    variant="subtle"
+                    p='7 !important'
+                    mt='2'
+                    className={styles.mainButton}
+                >
+                    <Avatar src={"/api/user/image"} name={name ?? undefined} />
+                    <Text>{name}</Text>
+                    <AiOutlineDown />
+                </Button>
+            </MenuTrigger>
+            <MenuContent p='0'>
+                <MenuItem value="view-profile">Profile</MenuItem>
+                <MenuItem value="sign-out" bg="red.500">Sign Out</MenuItem>
+            </MenuContent>
+        </MenuRoot>
     </Flex>
 }

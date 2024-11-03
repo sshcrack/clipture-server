@@ -14,6 +14,7 @@ export default function DownloadButtons() {
                             className={styles.buttonText}
                         >Download</Text>
                         <Flex
+                        pr='5'
                             className={styles.buttonDownload}
                         >
                             <BsArrowDown style={{
@@ -26,7 +27,7 @@ export default function DownloadButtons() {
                     </Flex>
                 </Flex>
         </Link>
-        <Link href='https://github.com/sshcrack/clipture/releases/latest' style={{paddingTop: "var(--chakra-space-8)"}}>
+        <Link href='https://github.com/sshcrack/clipture/releases/latest' style={{paddingTop: "var(--chakra-spacing-8)"}}>
                 <Text>More download options</Text>
         </Link>
     </>

@@ -15,6 +15,10 @@ const nextConfig = {
   },
   experimental: {
     optimizePackageImports: ["@chakra-ui/react"]
+  },
+  // Status at https://github.com/vercel/next.js/issues/71638
+  sassOptions: {
+    silenceDeprecations: ['legacy-js-api'],
   }
 }
 

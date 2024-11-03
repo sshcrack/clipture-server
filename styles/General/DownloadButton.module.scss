@@ -1,5 +1,5 @@
 .glowBox {
-    margin-top: var(--chakra-space-10);
+    margin-top: var(--chakra-spacing-10);
     position: relative;
     height: 5em;
     width: 18em;
@@ -53,7 +53,7 @@
         width: 100%;
         text-align: center;
         font-size: 1.5em;
-        padding: var(--chakra-space-3);
+        padding: var(--chakra-spacing-3);
     }
 
     .buttonDownload {
@@ -63,7 +63,7 @@
         height: 100%;
 
         background-color: var(--chakra-colors-whiteAlpha-100);
-        padding: var(--chakra-space-5);
+        padding: var(--chakra-spacing-6);
 
         border-radius: var(--chakra-radii-xl);
         border-top-left-radius: 0;
@@ -90,6 +90,10 @@
             linear-gradient(#fff 0 0) padding-box,
             linear-gradient(#fff 0 0);
         -webkit-mask-composite: xor;
+
+        mask:
+            linear-gradient(#fff 0 0) padding-box,
+            linear-gradient(#fff 0 0);
         mask-composite: exclude;
         transition: opacity .2s ease-in-out;
     }

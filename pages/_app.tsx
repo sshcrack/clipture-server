@@ -5,7 +5,7 @@ import '../styles/globals.scss'
 
 import { ColorModeProvider } from '../components/ui/color-mode';
 import { Provider } from '../components/ui/provider';
-import { theme } from '../util/theme';
+import theme from '../util/theme';
 
 function MyApp({ Component, pageProps }: AppProps) {
   if (typeof window !== "undefined")
@@ -15,11 +15,9 @@ function MyApp({ Component, pageProps }: AppProps) {
     session={pageProps.session}
   >
     <Provider value={theme}>
-      <ColorModeProvider forcedTheme='dark'>
-        <Theme appearance='dark'>
-          <Component {...pageProps} />
-        </Theme>
-      </ColorModeProvider>
+      <Theme appearance='dark'>
+        <Component {...pageProps} />
+      </Theme>
     </Provider>
   </SessionProvider>
 }

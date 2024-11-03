@@ -1,4 +1,4 @@
-import { createSystem, defaultConfig, defineTokens } from '@chakra-ui/react'
+import { createSystem, defaultConfig, defineSemanticTokens, defineTokens, mergeConfigs, SystemConfig } from '@chakra-ui/react'
 
 type TokenDefinition = Parameters<typeof defineTokens>[0]
 const fonts: TokenDefinition["fonts"] = {
@@ -44,10 +44,8 @@ const colors: TokenDefinition["colors"] = {
         1300: { value: "hsl(202, 98%, 30%)" },
         1400: { value: "hsl(202, 98%, 26%)" },
     },
-    brand: {
-        primary: { value: "#b721ff" },
-        secondary: { value: "#21aefd" },
-        bg: { value: "#152B3F" }
+    brandBg: {
+        500: { value: "hsl(209, 51%, 16%)" }
     },
     illustration: {
         bg: { value: "#04294F" },
@@ -57,21 +55,40 @@ const colors: TokenDefinition["colors"] = {
     }
 }
 
+const recipes: NonNullable<SystemConfig["theme"]>["recipes"] = {
+    Button: {
+        /*colorScheme: {
+            'dark-red': {
+                bg: 'red.700'
+            },
+        }*/
+    }
+}
+
 const tokens = defineTokens({
     fonts,
     colors
 })
 
-const component = {
-    Button: {
-        colorScheme: {
-            'dark-red': {
-                bg: 'red.700'
-            },
+const semanticTokens = defineSemanticTokens({
+    colors: {
+        brand: {
+            primary: { value: "{colors.brandPrimary.900}" },
+            secondary: { value: "{colors.brandSecondary.900}" },
+            bg: { value: "{colors.brandBg.500}" }
+        },
+        illustration: {
+            bg: { value: "{colors.illustration.bg}" },
+            primary: { value: "{colors.illustration.primary}" },
+            secondary: { value: "{colors.illustration.secondary}" },
+            tertiary: { value: "{colors.illustration.tertiary}" }
+        },
+        bg: {
+            DEFAULT: { value: "#1A202C" }
         }
     }
-}
+})
 
-//TODO component
-
-export const theme = createSystem(defaultConfig, { theme: { tokens } })
+const config = mergeConfigs(defaultConfig, { theme: { tokens, recipes, semanticTokens } })
+const theme = createSystem(config)
+export default theme

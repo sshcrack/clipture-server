@@ -59,8 +59,8 @@ export default function Navbar() {
             {status === "loading" ?
                 <Spinner /> : (
                     status === "authenticated" ?
-                        <ProfileLazy flex='0' /> :
-                        <LoginButton flex='0' />
+                        <ProfileLazy pt='2' flex='0' /> :
+                        <LoginButton pt='2' flex='0' />
                 )
             }
         </Flex>

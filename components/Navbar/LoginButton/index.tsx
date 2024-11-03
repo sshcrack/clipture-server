@@ -5,7 +5,7 @@ export default function LoginButton(props: FlexProps) {
     return <Flex
         {...props}
     >
-        <Button onClick={() => {
+        <Button variant="subtle" onClick={() => {
             location.href = getPageURL("/redirects/login", "?redirectHome=true")
         }}>Login</Button>
     </Flex>

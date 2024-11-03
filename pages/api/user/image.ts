@@ -18,8 +18,10 @@ export default async function UserImageAPI(req: NextApiRequest, res: NextApiResp
     if (typeof userId !== "string" || userId.length > 30 || !checkCUID(userId))
         return sendErrorResponse(res, GeneralError.ID_WRONG_TYPE)
 
-    if (cache.has(userId))
-        return res.redirect(cache.get(userId) as string)
+    if (cache.has(userId)) {
+        res.redirect(cache.get(userId) as string)
+        return
+    }
 
     const dbAcc = await prisma.account.findFirst({ where: { userId: userId }, include: { user: true } })
     if (!dbAcc)
@@ -30,7 +32,9 @@ export default async function UserImageAPI(req: NextApiRequest, res: NextApiResp
     if (dcRes.statusCode === 200) {
         cache.set(userId, avatarUrl)
         addCacheExpire(userId)
-        return res.redirect(avatarUrl)
+        res.redirect(avatarUrl)
+
+        return
     }
 
     let { access_token, token_type, id: dbAccId, refresh_token, userId: dbUserId } = dbAcc
@@ -90,5 +94,6 @@ export default async function UserImageAPI(req: NextApiRequest, res: NextApiResp
     cache.set(userId, avatarUrl)
     addCacheExpire(userId)
     console.log("Setting", userId, "to", avatarUrl)
-    return res.redirect(newImg)
+
+    res.redirect(newImg)
 }

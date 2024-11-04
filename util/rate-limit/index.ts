@@ -69,6 +69,10 @@ export class RateLimit {
         {
             type: ConsumeType.DebugReport,
             retries: 10
+        },
+        {
+            type: ConsumeType.LoginToken,
+            retries: 10
         }
     ].map(e => {
         const obj: CostInterface<ConsumeType> = {

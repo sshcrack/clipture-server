@@ -101,7 +101,7 @@
 
 .buttonOuter:hover {
     .buttonDownload {
-        background-color: var(--chakra-colors-brandPrimary-900);
+        background-color: var(--chakra-colors-brand-primary-900);
         svg {
             animation: downloadAnim .5s ease-in-out alternate infinite;
         }
